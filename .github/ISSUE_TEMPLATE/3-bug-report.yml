@@ -1,0 +1,76 @@
+name: Bug report
+description: Report an auto splitter that doesn't work as expected.
+labels: ["bug"]
+body:
+  - type: checkboxes
+    id: searched
+    attributes:
+      label: Existing issues
+      options:
+        - label: I searched the existing issues and this hasn't been reported.
+          required: true
+  - type: dropdown
+    id: game
+    attributes:
+      label: Auto splitter
+      options:
+        - gta-sa-de (Grand Theft Auto San Andreas – The Definitive Edition)
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Auto splitter version
+      description: The release you downloaded, e.g. gta-sa-de-v0.2.0, or the commit you built.
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What went wrong, for example a split that didn't happen, happened twice or happened at the wrong time.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Load the auto splitter with these settings ...
+        2. Start a new game ...
+        3. ...
+    validations:
+      required: true
+  - type: input
+    id: game-version
+    attributes:
+      label: Game version and platform
+      description: The game's version and store, and Wine or Proton if it runs through it.
+      placeholder: e.g. 1.0.113.21181, Steam, Proton 11
+    validations:
+      required: true
+  - type: dropdown
+    id: timer
+    attributes:
+      label: Timer
+      options:
+        - LiveSplit (auto splitting runtime component)
+        - LiveSplit One (desktop)
+        - livesplit-asr-bridge
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: The auto splitter's log messages, if your timer shows them.
+      render: text
+    validations:
+      required: false

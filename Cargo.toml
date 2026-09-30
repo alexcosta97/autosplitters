@@ -1,0 +1,13 @@
+[workspace]
+resolver = "2"
+members = ["games/*"]
+
+# Auto splitters are loaded by the timer on every start, so keep them small.
+[profile.release]
+lto = true
+panic = "abort"
+codegen-units = 1
+strip = true
+
+[profile.release.build-override]
+opt-level = 0

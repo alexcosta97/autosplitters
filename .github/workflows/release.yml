@@ -1,0 +1,103 @@
+name: Release
+
+# Each game is released on its own. Every merge to main publishes a release
+# candidate for each game whose folder changed in a way that needs a release
+# (see scripts/release/plan.sh). Approving a game's pending release job
+# publishes its full release from the same commit, with the candidate's .wasm.
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+# A newer merge cancels an older run, including candidates still waiting for
+# approval, so only the latest candidates can be promoted.
+concurrency:
+  group: release
+  cancel-in-progress: true
+
+jobs:
+  plan:
+    name: plan
+    runs-on: ubuntu-latest
+    outputs:
+      games: ${{ steps.plan.outputs.games }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: jdx/mise-action@v4
+      - id: plan
+        run: scripts/release/plan.sh
+
+  candidate:
+    name: publish ${{ matrix.game }} release candidate
+    needs: plan
+    if: needs.plan.outputs.games != '[]'
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.plan.outputs.games) }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: ./.github/actions/rust-setup
+      - uses: jdx/mise-action@v4
+      - name: Test and build
+        env:
+          GAME: ${{ matrix.game }}
+        run: |
+          package="$GAME-autosplitter"
+          cargo test-host --locked -p "$package"
+          cargo build --release --locked -p "$package"
+          mkdir -p dist
+          cp "target/wasm32-unknown-unknown/release/${package//-/_}.wasm" "dist/$GAME.wasm"
+      - name: Publish the pre-release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GAME: ${{ matrix.game }}
+          RC_TAG: ${{ matrix.rc_tag }}
+          PREVIOUS_RC_TAG: ${{ matrix.previous_rc_tag }}
+        run: |
+          scripts/release/notes.sh "$GAME" rc "$PREVIOUS_RC_TAG" > notes.md
+          if gh release view "$RC_TAG" > /dev/null 2>&1; then
+            gh release upload "$RC_TAG" dist/* --clobber
+          else
+            gh release create "$RC_TAG" dist/* --prerelease --target "$GITHUB_SHA" \
+              --title "$RC_TAG" --notes-file notes.md
+          fi
+
+  # Waits for a maintainer to approve, per game, through the release
+  # environment. The full release ships the candidate's .wasm unchanged.
+  release:
+    name: publish ${{ matrix.game }} release
+    needs: [plan, candidate]
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.plan.outputs.games) }}
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: jdx/mise-action@v4
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GAME: ${{ matrix.game }}
+          RC_TAG: ${{ matrix.rc_tag }}
+          TAG: ${{ matrix.game }}-v${{ matrix.version }}
+        run: |
+          gh release download "$RC_TAG" --pattern "$GAME.wasm" --dir dist
+          scripts/release/notes.sh "$GAME" full > notes.md
+          gh release create "$TAG" dist/* --latest --target "$GITHUB_SHA" \
+            --title "$TAG" --notes-file notes.md

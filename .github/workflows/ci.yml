@@ -1,0 +1,79 @@
+name: CI
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Compiles the dependencies and saves the Rust cache the other jobs restore.
+  # rust-cache skips saving on an exact key match, so a pull request only saves
+  # a cache when its dependencies differ from main. On push to main it saves
+  # the cache new pull requests restore, and doesn't run the checks.
+  setup:
+    name: setup
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/rust-setup
+        with:
+          save-cache: 'true'
+      - run: cargo clippy --release --locked
+      - run: cargo clippy --tests --locked --target x86_64-unknown-linux-gnu
+      - run: cargo build --release --locked
+
+  # These jobs use `!cancelled()` so they still run when `setup` fails: a job
+  # skipped because `setup` failed reports as success and would not block the
+  # merge, so they run anyway and report the real failure.
+  lint:
+    name: lint
+    needs: setup
+    if: ${{ !cancelled() && github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/rust-setup
+      - run: cargo fmt --check
+      - name: Clippy (wasm)
+        run: cargo clippy --release --locked -- -D warnings
+      - name: Clippy (host tests)
+        run: cargo clippy --tests --locked --target x86_64-unknown-linux-gnu -- -D warnings
+
+  test:
+    name: test
+    needs: setup
+    if: ${{ !cancelled() && github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/rust-setup
+      - run: cargo test-host --locked
+
+  # WebAssembly is the same whatever it's built on, so one build checks every
+  # game.
+  build:
+    name: build
+    needs: setup
+    if: ${{ !cancelled() && github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/rust-setup
+      - run: cargo build --release --locked
+
+  commitlint:
+    name: commitlint
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: wagoid/commitlint-github-action@v6

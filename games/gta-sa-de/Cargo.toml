@@ -1,0 +1,16 @@
+[package]
+name = "gta-sa-de-autosplitter"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+asr = { git = "https://github.com/LiveSplit/asr", features = [
+    "alloc", # Working with allocations.
+    "signature", # Scanning signatures.
+] }
+
+# Heap allocator
+dlmalloc = { version = "0.2.4", features = ["global"] }
+
+[lib]
+crate-type = ["cdylib"]

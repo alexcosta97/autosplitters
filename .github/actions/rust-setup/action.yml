@@ -1,0 +1,23 @@
+# Installs the Rust toolchain from rust-toolchain.toml (with the wasm32 target,
+# clippy and rustfmt) and restores the Rust cache. Every CI job shares one
+# cache key, so a job that saves it compiles the dependencies once and the
+# others reuse them.
+name: Rust setup
+description: Install the Rust toolchain from rust-toolchain.toml, and restore the Rust cache
+
+inputs:
+  save-cache:
+    description: Whether to save the Rust cache at the end of the job
+    required: false
+    default: 'false'
+
+runs:
+  using: composite
+  steps:
+    - name: Install the toolchain from rust-toolchain.toml
+      shell: bash
+      run: rustup toolchain install
+    - uses: Swatinem/rust-cache@v2
+      with:
+        shared-key: ci
+        save-if: ${{ inputs.save-cache }}

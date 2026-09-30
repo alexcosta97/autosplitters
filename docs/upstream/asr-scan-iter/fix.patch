@@ -1,0 +1,188 @@
+From d53edfa6e0d67e19e8ccb005a0231a22b135a046 Mon Sep 17 00:00:00 2001
+From: Alex Costa <alex@alexcosta.dev>
+Date: Fri, 25 Sep 2026 19:13:51 +0100
+Subject: [PATCH] Fix signature scans over ranges that aren't page aligned
+
+`Signature::scan_iter` carries the last `N - 1` bytes of each chunk over
+to the front of the next one, so matches across page boundaries are
+found. It indexed that tail with the length of the chunk about to be
+read instead of the chunk that was just read. Chunks are only both full
+pages in the middle of a page aligned range, so:
+
+- A range ending partway through a page panicked in `copy_from_slice`
+  once the scan reached the short last chunk, i.e. whenever the
+  signature wasn't found before it. Modules under Wine / Proton often
+  have a `SizeOfImage` like this (e.g. `0x5CA4400`).
+- A range starting partway through a page carried stale bytes after the
+  short first chunk, missing matches across the first page boundary.
+- A first chunk shorter than `N - 1` bytes panicked as well.
+
+The tail is now indexed by the previous chunk's length and also keeps
+bytes carried in front of that chunk if it was shorter than `N - 1`.
+Match addresses are adjusted by the number of bytes actually carried.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ src/signature.rs | 117 ++++++++++++++++++++++++++++++++++++-----------
+ 1 file changed, 91 insertions(+), 26 deletions(-)
+
+diff --git a/src/signature.rs b/src/signature.rs
+index 32c0b3e..a204ac6 100644
+--- a/src/signature.rs
++++ b/src/signature.rs
+@@ -255,6 +255,11 @@ impl<const N: usize> Signature<N> {
+         }
+ 
+         let mut last_page_success = false;
++        // The length of the previous chunk and the number of bytes that were
++        // carried over in front of it. Chunks are shorter than a page at the
++        // start and end of the range if those aren't page aligned.
++        let mut last_len = 0;
++        let mut carried = 0;
+ 
+         // Although a bit slower, we need to ensure the compiler doesn't do unexpected optimizations
+         // to the MaybeUninit struct. For this reason we are explicitly zero-initializing our buffer.
+@@ -289,50 +294,46 @@ impl<const N: usize> Signature<N> {
+             let len = end.saturating_sub(addr.value()) as usize;
+ 
+             // If we have read the previous memory page successfully, then we can copy the last
+-            // elements to the start of the buffer.
+-            if last_page_success {
+-                let (start, end) = buffer.split_at_mut(N.saturating_sub(1));
+-                start.copy_from_slice(&end[len.saturating_sub(N).saturating_add(1)..]);
+-            }
++            // elements to the start of the buffer. These are the last N - 1 bytes of the
++            // previous chunk, preceded by what was carried in front of it if that chunk was
++            // shorter than N - 1 bytes. They are indexed by the previous chunk's length, as
++            // the current one may differ from it.
++            let head = N.saturating_sub(1);
++            carried = if last_page_success {
++                (carried + last_len).min(head)
++            } else {
++                0
++            };
++            let tail_end = head + last_len;
++            buffer.copy_within(tail_end - carried..tail_end, head - carried);
+ 
+             let current_page_success = process
+-                .read_into_slice(addr, &mut buffer[N.saturating_sub(1)..][..len])
++                .read_into_slice(addr, &mut buffer[head..][..len])
+                 .is_ok();
+ 
+             // We define the final slice on which to perform the memory scan into. If we failed to read the memory page,
+             // this returns an empty slice so the subsequent iterator will result into an empty iterator.
+-            // If we managed to read the current memory page, instead, we check if we have successfully read the data
+-            // from the previous memory page.
++            // If we managed to read the current memory page, instead, we scan it together with the
++            // bytes carried over from the previous memory page.
+             let scan_buf = unsafe {
+                 if current_page_success {
+-                    if last_page_success {
+-                        slice::from_raw_parts(
+-                            buffer.as_ptr(),
+-                            len.saturating_add(N).saturating_sub(1),
+-                        )
+-                    } else {
+-                        slice::from_raw_parts(buffer.as_ptr().byte_add(N).byte_sub(1), len)
+-                    }
++                    slice::from_raw_parts(buffer.as_ptr().byte_add(head - carried), carried + len)
+                 } else {
+                     &[]
+                 }
+             };
+ 
+             let cur_addr = addr;
+-            let cur_suc = last_page_success;
++            let cur_carried = carried;
+ 
+             addr = Address::new(end);
+             last_page_success = current_page_success;
++            last_len = len;
+ 
+-            Some(self.scan_internal(&scan_buf).map(move |pos| {
+-                let mut address = cur_addr.add(pos as u64);
+-
+-                if cur_suc {
+-                    address = address.add_signed(-(N.saturating_sub(1) as i64))
+-                }
+-
+-                address
+-            }))
++            Some(
++                self.scan_internal(&scan_buf)
++                    .map(move |pos| cur_addr.add(pos as u64).add_signed(-(cur_carried as i64))),
++            )
+         })
+         .flatten()
+     }
+@@ -632,3 +633,67 @@ fn find_byte_swar(haystack: &[u8], needle: u8, mut start: usize) -> Option<usize
+ 
+     None
+ }
++
++#[cfg(all(test, not(target_family = "wasm")))]
++mod tests {
++    use super::Signature;
++    use crate::{runtime::mock::with_process, Address};
++    use std::vec::Vec;
++
++    const BASE: u64 = 0x10000;
++
++    static SIG: Signature<4> = Signature::new("DE AD ?? EF");
++
++    /// Zeroed memory of the given size at `BASE`, with a match for `SIG` at
++    /// each of the given offsets.
++    fn memory(size: usize, matches: &[usize]) -> Vec<u8> {
++        let mut bytes = std::vec![0; size];
++        for &offset in matches {
++            bytes[offset..offset + 4].copy_from_slice(&[0xDE, 0xAD, 0xBE, 0xEF]);
++        }
++        bytes
++    }
++
++    fn scan(bytes: &[u8], start: u64, len: u64) -> Vec<Address> {
++        with_process(&[(BASE, bytes)], |process| {
++            SIG.scan_iter(process, (Address::new(BASE + start), len))
++                .collect()
++        })
++    }
++
++    fn at(offsets: &[u64]) -> Vec<Address> {
++        offsets.iter().map(|o| Address::new(BASE + o)).collect()
++    }
++
++    #[test]
++    fn matches_in_and_across_full_pages() {
++        let bytes = memory(0x3000, &[0x10, 0xFFD, 0x1FFF, 0x2FFC]);
++        assert_eq!(scan(&bytes, 0, 0x3000), at(&[0x10, 0xFFD, 0x1FFF, 0x2FFC]));
++    }
++
++    #[test]
++    fn range_ending_mid_page_without_a_match() {
++        let bytes = memory(0x1400, &[]);
++        assert_eq!(scan(&bytes, 0, 0x1400), at(&[]));
++    }
++
++    #[test]
++    fn match_across_a_page_boundary_into_a_short_last_chunk() {
++        let bytes = memory(0x1400, &[0xFFE]);
++        assert_eq!(scan(&bytes, 0, 0x1400), at(&[0xFFE]));
++    }
++
++    #[test]
++    fn match_across_a_page_boundary_after_a_short_first_chunk() {
++        // The range starts 0x100 bytes before a page boundary.
++        let bytes = memory(0x2000, &[0xFFE]);
++        assert_eq!(scan(&bytes, 0xF00, 0x1100), at(&[0xFFE]));
++    }
++
++    #[test]
++    fn match_starting_in_a_first_chunk_shorter_than_the_signature() {
++        // The first chunk is only 2 bytes, less than the 3 carried over.
++        let bytes = memory(0x2000, &[0xFFF]);
++        assert_eq!(scan(&bytes, 0xFFE, 0x100), at(&[0xFFF]));
++    }
++}
+-- 
+2.55.0
+
