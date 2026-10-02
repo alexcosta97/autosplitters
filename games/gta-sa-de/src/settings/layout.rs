@@ -149,6 +149,11 @@ pub fn build() -> Tree {
     b.heading("General", "General", 0);
     b.check("start", Some("Start timer on New Game"), true);
     b.check("reset", Some("Reset timer on New Game"), true);
+    // Off by default: reloading a save during a run would reset it.
+    b.check("startOnSaveLoad", Some("Start timer on loading a save"), false);
+    b.tooltip("For practising part of a run from a save");
+    b.check("resetOnSaveLoad", Some("Reset timer on loading a save"), false);
+    b.tooltip("Starts it again if \"Start timer on loading a save\" is on");
     b.check("doubleSplitPrevention", Some("Double-Split Prevention"), true);
     b.tooltip(
         "Impose cooldown of 2.5s between auto-splits.\nThis may not work for all types of splits.",
