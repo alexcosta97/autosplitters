@@ -16,6 +16,7 @@ static ALLOC: dlmalloc::GlobalDlmalloc = dlmalloc::GlobalDlmalloc;
 mod completion;
 mod data;
 mod settings;
+mod triggers;
 
 use alloc::{format, string::String, vec, vec::Vec};
 use asr::{
@@ -27,6 +28,7 @@ use asr::{
 };
 
 use settings::Settings;
+use triggers::{Events, Triggers};
 
 asr::async_main!(stable);
 asr::panic_handler!();
@@ -190,6 +192,10 @@ impl<T: Copy> Pair<T> {
             self.current = value;
         }
     }
+
+    fn pair(self) -> (T, T) {
+        (self.old, self.current)
+    }
 }
 
 struct Memory {
@@ -280,14 +286,9 @@ struct Splitter {
     /// Tick when the last split was executed (to prevent double-splits).
     last_split: Option<u64>,
     waiting: bool,
-    /// Whether a New Game may still start/reset the timer. The start flag
-    /// flips 1 -> 0 more than once during the intro (again ~5s in, still under
-    /// the play time limit), which would reset and restart the timer, so only
-    /// the first one counts until play time goes backwards again (New Game or
-    /// loading a save).
-    new_game_armed: bool,
-    /// A New Game was detected on this tick.
-    new_game: bool,
+    triggers: Triggers,
+    /// What can start or reset the timer that happened on this tick.
+    events: Events,
 }
 
 impl Splitter {
@@ -354,19 +355,8 @@ impl Splitter {
             self.last_load = Some(self.tick);
         }
 
-        if mem.play_time.current < mem.play_time.old {
-            self.new_game_armed = true;
-        }
-        // startFlag switches to 0 from 1 when the game begins to fade out to
-        // the intro cutscene. The check for the playing time is there so the
-        // timer doesn't start/reset when loading a save.
-        self.new_game = self.new_game_armed
-            && mem.start_flag.current == 0
-            && mem.start_flag.old == 1
-            && mem.play_time.current < 5 * 1000;
-        if self.new_game {
-            self.new_game_armed = false;
-        }
+        self.events =
+            self.triggers.update(mem.loading.pair(), mem.start_flag.pair(), mem.play_time.pair());
 
         // Clear list of already executed splits if timer is reset
         let phase = timer::state();
@@ -380,8 +370,12 @@ impl Splitter {
     }
 
     fn start(&self) -> bool {
-        if self.new_game && self.settings.get("start") {
+        if self.events.new_game && self.settings.get("start") {
             debug("New Game");
+            return true;
+        }
+        if self.events.save_loaded && self.settings.get("startOnSaveLoad") {
+            debug("Save Loaded");
             return true;
         }
         false
@@ -390,7 +384,9 @@ impl Splitter {
     fn reset(&mut self) -> bool {
         // Only downside is that accidental new game will reset the timer (but
         // who would do that with the way DE menu is laid out?)
-        if self.new_game && self.settings.get("reset") {
+        let reset = (self.events.new_game && self.settings.get("reset"))
+            || (self.events.save_loaded && self.settings.get("resetOnSaveLoad"));
+        if reset {
             debug("Reset");
             self.split.clear();
             return true;
@@ -627,8 +623,8 @@ async fn main() {
         last_load: None,
         last_split: None,
         waiting: false,
-        new_game_armed: true,
-        new_game: false,
+        triggers: Triggers::new(),
+        events: Events::default(),
     };
 
     loop {

@@ -103,7 +103,13 @@ Log messages are prefixed with `[GTASA:DE Autosplitter]`.
   SF 9582, LV 9586 instead of 9575, 9576, 9580). SF was confirmed by watching
   $9582 change when learning the San Fierro gym moves; LS and LV follow the
   same spacing (`data::VERSION_SHIFTED`).
-- The unused `startOnSaveLoad` setting was dropped.
+- The ASL's unused `startOnSaveLoad` setting now does something: "Start timer
+  on loading a save" starts the timer once a save has finished loading, and
+  "Reset timer on loading a save" (`resetOnSaveLoad`, new) resets it, starting
+  it again if the start setting is on. They're for practising part of a run
+  from a save, so both are off by default: reloading a save during a run would
+  otherwise reset it. Saves with under 5 s of play time don't count, so a New
+  Game doesn't trigger them.
 - If the executable version can't be read, pattern scanning is still attempted
   instead of disabling the auto splitter.
 
