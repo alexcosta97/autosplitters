@@ -5,11 +5,20 @@
 /// `$TRUCKING_TOTAL_PASSED_MISSIONS` on the versions the ASL's indexes are for.
 pub const TRUCKING: u32 = 9581;
 
+/// `g_nQuarryMissionsPassed` on the versions the ASL's indexes are for.
+pub const QUARRY: u32 = 9593;
+
+/// Freight level flags, see `MISSIONS2`.
+const FREIGHT_1: u32 = 9670;
+const FREIGHT_2: u32 = 9669;
+
 /// Globals that sit `Addresses::globals_shift` (6) slots later on
 /// 1.0.113.21181 than the ASL's indexes, which are for other versions. The ASL
 /// only did this for Trucking; the gyms were found by watching $9582 change
-/// when learning the San Fierro gym moves on 1.0.113.21181.
-pub static VERSION_SHIFTED: &[u32] = &[9575, 9576, 9580, TRUCKING];
+/// when learning the San Fierro gym moves on 1.0.113.21181. Quarry and
+/// Freight are declared after the gyms and Trucking in the leaked DE script
+/// source, so they move with them.
+pub static VERSION_SHIFTED: &[u32] = &[9575, 9576, 9580, TRUCKING, QUARRY, FREIGHT_1, FREIGHT_2];
 
 /// Global variable index and the associated values and missions.
 #[rustfmt::skip]
@@ -77,7 +86,7 @@ pub static MISSIONS: &[(u32, &[(i32, &str)])] = &[
         (1, "Trucking 1"), (2, "Trucking 2"), (3, "Trucking 3"), (4, "Trucking 4"),
         (5, "Trucking 5"), (6, "Trucking 6"), (7, "Trucking 7"), (8, "Trucking 8"),
     ]),
-    (9593, &[
+    (QUARRY, &[ // g_nQuarryMissionsPassed
         (1, "Quarry 1"), (2, "Quarry 2"), (3, "Quarry 3"), (4, "Quarry 4"),
         (5, "Quarry 5"), (6, "Quarry 6"), (7, "Quarry 7"),
     ]),
@@ -88,7 +97,9 @@ pub static MISSIONS: &[(u32, &[(i32, &str)])] = &[
 pub static MISSIONS2: &[(&str, &[(u32, &str)])] = &[
     // Flight School not here because it is a Story Mission
     ("Schools", &[
-        (8832, "Driving School Passed"), // $MISSION_BACK_TO_SCHOOL_PASSED
+        // driving_test_passed, set to 1 when Driving School is passed. The
+        // ASL used 8832, which never changes when it is.
+        (86, "Driving School Passed"),   // $MISSION_BACK_TO_SCHOOL_PASSED
         (3390, "Boat School Passed"),    // $MISSION_BOAT_SCHOOL_PASSED
         (3622, "Bike School Passed"),    // $MISSION_DRIVING_SCHOOL_PASSED (actually Bike School)
     ]),
@@ -132,8 +143,8 @@ pub static MISSIONS2: &[(&str, &[(u32, &str)])] = &[
         (763, "Blueberry (Safehouse)"),
     ]),
     ("Freight", &[
-        (9670, "Freight Level 1"), // $8240
-        (9669, "Freight Level 2"), // $8239 (goes to 2 at the end of the level)
+        (FREIGHT_1, "Freight Level 1"), // $8240
+        (FREIGHT_2, "Freight Level 2"), // $8239 (goes to 2 at the end of the level)
     ]),
     ("Gym Moves", &[
         (9575, "Los Santos Gym Moves"),    // $8153
@@ -155,7 +166,10 @@ pub static MISSIONS2: &[(&str, &[(u32, &str)])] = &[
         (3320, "Valet Parking Complete"), // $1900
     ]),
     // Races addresses are based on the global variable $RACES_WON ($3661), which
-    // is an array. The number in the comment is the $RACE_INDEX ($353).
+    // is an array. The number in the comment is the $RACE_INDEX ($353), and
+    // the address is 3721 + that index (got_race_made_progress[] in the
+    // leaked DE script source). The ASL left out the gap at 7 and 8, so it
+    // read every race from Dirtbike Danger on two indexes early.
     //
     // Missing are races that are already done during story missions:
     // Lowrider Race (0), Badlands A (7), Badlands B (8)
@@ -168,31 +182,33 @@ pub static MISSIONS2: &[(&str, &[(u32, &str)])] = &[
         (3727, "Into the Country"),  // 6
     ]),
     ("SF Races", &[
-        (3728, "Dirtbike Danger"),     // 9
-        (3729, "Bandito County"),      // 10
-        (3730, "Go-Go Karting"),       // 11
-        (3731, "San Fierro Fastlane"), // 12
-        (3732, "San Fierro Hills"),    // 13
-        (3733, "Country Endurance"),   // 14
+        (3730, "Dirtbike Danger"),     // 9
+        (3731, "Bandito County"),      // 10
+        (3732, "Go-Go Karting"),       // 11
+        (3733, "San Fierro Fastlane"), // 12
+        (3734, "San Fierro Hills"),    // 13
+        (3735, "Country Endurance"),   // 14
     ]),
     ("LV Races", &[
-        (3734, "SF to LV"),     // 15
-        (3735, "Dam Rider"),    // 16
-        (3736, "Desert Tricks"), // 17
-        (3737, "LV Ringroad"),  // 18
+        (3736, "SF to LV"),     // 15
+        (3737, "Dam Rider"),    // 16
+        (3738, "Desert Tricks"), // 17
+        (3739, "LV Ringroad"),  // 18
     ]),
     ("Air Races", &[
-        (3738, "World War Ace"),        // 19
-        (3739, "Barnstorming"),         // 20
-        (3740, "Military Service"),     // 21
-        (3741, "Chopper Checkpoint"),   // 22
-        (3742, "Whirly Bird Waypoint"), // 23
-        (3743, "Heli Hell"),            // 24
+        (3740, "World War Ace"),        // 19
+        (3741, "Barnstorming"),         // 20
+        (3742, "Military Service"),     // 21
+        (3743, "Chopper Checkpoint"),   // 22
+        (3744, "Whirly Bird Waypoint"), // 23
+        (3745, "Heli Hell"),            // 24
     ]),
     ("Stadium Events", &[
-        (3744, "8-Track"),   // 25
-        (3745, "Dirt Track"), // 26
-        (91, "Kickstart"),   // $MISSION_KICKSTART_PASSED ($90)
+        (3746, "8-Track"),   // 25
+        (3747, "Dirt Track"), // 26
+        // flag_kickstart_passed_1stime. The ASL used 91, which is
+        // f1_the90_best_score, set by a test halfway through Driving School.
+        (90, "Kickstart"),   // $MISSION_KICKSTART_PASSED ($90)
         (3362, "Bloodring"), // $MISSION_BLOODRING_PASSED ($1941)
     ]),
 ];
