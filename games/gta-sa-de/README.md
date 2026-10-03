@@ -137,6 +137,12 @@ Found while testing on 1.0.113.21181 under Proton 11:
   the Ammu-Nation challenge sets to 1 the first time its final round is
   passed. Found by lining up the leaked DE script source's declarations with
   the live globals (source slot + 37 in this area).
+- "Kickstart" reads `$90` instead of `$91`, and "Driving School Passed" reads
+  `$86` instead of `$8832`. In the leaked DE script source these are
+  `flag_kickstart_passed_1stime` and `driving_test_passed`, which Driving
+  School sets to 1 when it's passed. `$91` is `f1_the90_best_score`, the
+  score of the seventh driving test, so Kickstart split halfway through
+  Driving School, and `$8832` didn't change when the school was passed.
 
 ## Credits
 

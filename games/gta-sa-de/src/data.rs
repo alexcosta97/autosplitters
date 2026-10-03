@@ -88,7 +88,9 @@ pub static MISSIONS: &[(u32, &[(i32, &str)])] = &[
 pub static MISSIONS2: &[(&str, &[(u32, &str)])] = &[
     // Flight School not here because it is a Story Mission
     ("Schools", &[
-        (8832, "Driving School Passed"), // $MISSION_BACK_TO_SCHOOL_PASSED
+        // driving_test_passed, set to 1 when Driving School is passed. The
+        // ASL used 8832, which never changes when it is.
+        (86, "Driving School Passed"),   // $MISSION_BACK_TO_SCHOOL_PASSED
         (3390, "Boat School Passed"),    // $MISSION_BOAT_SCHOOL_PASSED
         (3622, "Bike School Passed"),    // $MISSION_DRIVING_SCHOOL_PASSED (actually Bike School)
     ]),
@@ -192,7 +194,9 @@ pub static MISSIONS2: &[(&str, &[(u32, &str)])] = &[
     ("Stadium Events", &[
         (3744, "8-Track"),   // 25
         (3745, "Dirt Track"), // 26
-        (91, "Kickstart"),   // $MISSION_KICKSTART_PASSED ($90)
+        // flag_kickstart_passed_1stime. The ASL used 91, which is
+        // f1_the90_best_score, set by a test halfway through Driving School.
+        (90, "Kickstart"),   // $MISSION_KICKSTART_PASSED ($90)
         (3362, "Bloodring"), // $MISSION_BLOODRING_PASSED ($1941)
     ]),
 ];
