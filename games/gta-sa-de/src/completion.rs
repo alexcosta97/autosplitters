@@ -6,7 +6,7 @@
 
 use alloc::vec::Vec;
 
-use crate::data::{self, CHILIAD_DONE, TRUCKING};
+use crate::data::{self, CHILIAD_DONE, QUARRY, TRUCKING};
 
 /// What a global has to be for its item to count as done.
 #[derive(Clone, Copy, Debug)]
@@ -56,7 +56,7 @@ pub static SECTIONS: &[(&str, Count)] = &[
     ("ZeroMissions", Count::Strand(544)),
     ("Wang CarsMissions", Count::Strand(546)),
     ("TruckingMissions", Count::Strand(TRUCKING)),
-    ("QuarryMissions", Count::Strand(9593)),
+    ("QuarryMissions", Count::Strand(QUARRY)),
     ("Assets", Count::Groups(&["Assets"])),
     ("Schools", Count::Groups(&["Schools"])),
     ("Vehicle Submissions", Count::Groups(&["Vehicle Submissions", "Freight"])),
@@ -179,7 +179,7 @@ mod tests {
         let items = |key| SECTIONS.iter().find(|(k, _)| *k == key).unwrap().1.items();
         assert!(matches!(items("HeistMissions")[..], [(602, Rule::AtLeast(6))]));
         assert!(matches!(items("TruckingMissions")[..], [(TRUCKING, Rule::AtLeast(8))]));
-        assert!(matches!(items("QuarryMissions")[..], [(9593, Rule::AtLeast(7))]));
+        assert!(matches!(items("QuarryMissions")[..], [(QUARRY, Rule::AtLeast(7))]));
         assert_eq!(items("Vehicle Submissions").len(), 7);
         assert_eq!(items("Properties").len(), 30);
         assert_eq!(items("Challenges").len(), 4);
