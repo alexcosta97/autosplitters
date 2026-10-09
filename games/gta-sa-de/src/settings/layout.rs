@@ -10,7 +10,7 @@
 use alloc::format;
 
 use super::tree::{Builder, Tree};
-use crate::data::{self, TRUCKING};
+use crate::data::{self, QUARRY, TRUCKING};
 
 // Story missions, in the order the ASL listed them.
 #[rustfmt::skip]
@@ -190,7 +190,7 @@ pub fn build() -> Tree {
     b.section_all_done("ZeroMissions", "Zero", 1, |b| add_missions(b, 544));
     b.section_all_done("Wang CarsMissions", "Wang Cars", 1, |b| add_missions(b, 546));
     b.section_all_done("TruckingMissions", "Trucking", 1, |b| add_missions(b, TRUCKING));
-    b.section_all_done("QuarryMissions", "Quarry", 1, |b| add_missions(b, 9593));
+    b.section_all_done("QuarryMissions", "Quarry", 1, |b| add_missions(b, QUARRY));
     b.section_all_done("Assets", "Couriers and Valet", 1, |b| add_missions2(b, "Assets", true));
 
     b.heading("Schools and vehicles", "Schools and vehicle missions", 0);

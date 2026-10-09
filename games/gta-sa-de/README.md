@@ -103,6 +103,9 @@ Log messages are prefixed with `[GTASA:DE Autosplitter]`.
   SF 9582, LV 9586 instead of 9575, 9576, 9580). SF was confirmed by watching
   $9582 change when learning the San Fierro gym moves; LS and LV follow the
   same spacing (`data::VERSION_SHIFTED`).
+- Quarry (`$9593`) and the Freight levels (`$9669`, `$9670`) get the same +6
+  shift on 1.0.113.21181. They're declared after the gym and Trucking globals
+  in the leaked DE script source, so they move with them.
 - The ASL's unused `startOnSaveLoad` setting now does something: "Start timer
   on loading a save" starts the timer once a save has finished loading, and
   "Reset timer on loading a save" (`resetOnSaveLoad`, new) resets it, starting
@@ -137,6 +140,17 @@ Found while testing on 1.0.113.21181 under Proton 11:
   the Ammu-Nation challenge sets to 1 the first time its final round is
   passed. Found by lining up the leaked DE script source's declarations with
   the live globals (source slot + 37 in this area).
+- "Kickstart" reads `$90` instead of `$91`, and "Driving School Passed" reads
+  `$86` instead of `$8832`. In the leaked DE script source these are
+  `flag_kickstart_passed_1stime` and `driving_test_passed`, which Driving
+  School sets to 1 when it's passed. `$91` is `f1_the90_best_score`, the
+  score of the seventh driving test, so Kickstart split halfway through
+  Driving School, and `$8832` didn't change when the school was passed.
+- Races from Dirtbike Danger on read `$3721` + their race index, like the Los
+  Santos races. The ASL skipped the indexes of Badlands A and B (7 and 8), so
+  it read every San Fierro, Las Venturas, air and stadium race two indexes
+  early: winning Dirtbike Danger split "Go-Go Karting", and the first two San
+  Fierro races read the Badlands races.
 
 ## Credits
 
