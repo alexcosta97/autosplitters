@@ -16,6 +16,7 @@ static ALLOC: dlmalloc::GlobalDlmalloc = dlmalloc::GlobalDlmalloc;
 mod completion;
 mod data;
 mod settings;
+mod territory;
 mod triggers;
 
 use alloc::{format, string::String, vec, vec::Vec};
@@ -482,6 +483,15 @@ impl Splitter {
                     }
                 }
             }
+        }
+
+        // Gang territories unlocking "End of the Line"
+        let unlocked = territory::just_unlocked(
+            mem.global(data::RIOT_PASSED).pair(),
+            mem.global(territory::OWNED).pair(),
+        );
+        if unlocked && self.try_split("Territories Unlock") {
+            return true;
         }
 
         // End of any%

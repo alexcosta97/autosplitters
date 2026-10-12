@@ -78,7 +78,7 @@ pub static MISSIONS: &[(u32, &[(i32, &str)])] = &[
     ]),
     (628, &[(1, "A Home in the Hills"), (2, "Vertical Bird"), (3, "Home Coming"), (4, "Cut Throat Business")]), // $MANSION_TOTAL_PASSED_MISSIONS
     (629, &[(1, "Beat Down on B Dup"), (2, "Grove 4 Life")]), // $GROVE_TOTAL_PASSED_MISSIONS
-    (631, &[ // $RIOT_TOTAL_PASSED_MISSIONS
+    (RIOT_PASSED, &[ // $RIOT_TOTAL_PASSED_MISSIONS
         (1, "Riot"), (2, "Los Desperados"), (3, "End of the Line Part 1"),
         (4, "End of the Line Part 2"), (5, "End of the Line Part 3"), // After credits
     ]),
@@ -245,6 +245,8 @@ pub static START_MISSIONS: &[(&str, &str)] = &[
 ];
 
 // Global variables that aren't missions
+/// $RIOT_TOTAL_PASSED_MISSIONS, the Riot strand's missions passed.
+pub const RIOT_PASSED: u32 = 631;
 pub const EOTL: u32 = 9436;
 pub const CHILIAD_RACE: u32 = 3218;
 pub const CHILIAD_DONE: u32 = 3220;

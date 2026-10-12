@@ -113,6 +113,15 @@ Log messages are prefixed with `[GTASA:DE Autosplitter]`.
   from a save, so both are off by default: reloading a save during a run would
   otherwise reset it. Saves with under 5 s of play time don't count, so a New
   Game doesn't trigger them.
+- "Territories at 35%" (`Territories Unlock`, new, under Return to Los Santos'
+  Ending) splits when the gang territories unlock "End of the Line": Los
+  Desperados is passed and at least 35% of the territories are owned. After Los
+  Desperados, Sweet's phone call that lets you start "End of the Line" only
+  comes once more than 34% are owned. It works whichever of the two comes
+  last. The percentage is a script global ($713) that the game refreshes every
+  20 s, so the split can come up to 20 s after the territory is taken. "GT #1"
+  and "GT #2" are unchanged: they still split on starting Grove 4 Life and Cut
+  Throat Business, whatever the percentage.
 - If the executable version can't be read, pattern scanning is still attempted
   instead of disabling the auto splitter.
 
@@ -162,6 +171,10 @@ auto splitter. Thanks to everyone who worked on it:
 - **hoxi**: adapting it to the Definitive Edition.
 - **Parik**: the patterns for signature scanning and the global variable
   indexes.
+
+The global variable indexes were checked against the leaked DE main script
+([JuniorDjjr's gist](https://gist.github.com/JuniorDjjr/2129e1e7640f7969acdfb1c56c263155)),
+which the "leaked DE script source" mentioned above refers to.
 
 The notes in the source that name ASL variables (`$SWEET_TOTAL_PASSED_MISSIONS`
 and so on) come from their work.

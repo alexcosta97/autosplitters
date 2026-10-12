@@ -180,6 +180,11 @@ pub fn build() -> Tree {
         b.check("End of the Line Part 3", Some("End of the Line Part 3 (after Credits)"), false);
         b.check("GT #1", Some("Gang Territories #1 (at starting of Grove 4 Life)"), false);
         b.check("GT #2", Some("Gang Territories #2 (at starting of Cut Throat Business)"), false);
+        b.check(
+            "Territories Unlock",
+            Some("Territories at 35% (unlocks End of the Line, once Los Desperados is passed)"),
+            false,
+        );
         b.check("any%", Some("End of any% (start of Firetruck Bridge Cutscene)"), true);
     });
 
