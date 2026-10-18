@@ -1,29 +1,38 @@
 //! Splits on the gang territories owned.
 //!
 //! The game keeps the percentage of territories owned in a script global,
-//! `player_territory_owned`, which is what these read. A split can also need a
-//! number of missions of a strand passed, so it happens at the right point of
-//! the story.
+//! `player_territory_owned`, which is what these read. They only count once
+//! the territories side quest has been enabled again on the way back to Los
+//! Santos, whatever the route to get there.
 //!
 //! Doesn't touch `asr`, so it can be tested on the host.
 
-use crate::data::GROVE_PASSED;
+use crate::data::MANSION_PASSED;
 
 /// `player_territory_owned`: the percentage of territories owned, 0 to 100.
 ///
-/// Refreshed by the `TCASH` script every 20 s of game time (running from
-/// passing the `mansio3` script for the last segment of the game) and by the
-/// phone call check itself, so it can be up to 20 s behind.
+/// Refreshed by the `TCASH` script every 20 s of game time (running again from
+/// the second enablement on) and by the phone call check itself, so it can be
+/// up to 20 s behind.
 pub const OWNED: u32 = 713;
 
-/// A split that happens once enough territories are owned, and some missions
-/// are passed if it needs them.
+/// Global variable that tells the territories side quest is enabled again on
+/// Return to Los Santos, and the value it has from then on.
+///
+/// The first enablement is the tutorial gang war, which is switched off again
+/// before leaving Los Santos. The second one is in `mission_mansion3_passed`,
+/// which in one go sets `SET_GANG_WARS_ACTIVE TRUE`, starts the territory
+/// income script and raises the mansion missions passed
+/// (`flag_mansion_mission_counter`) to 3. The script has no flag of its own for
+/// it: the one global the tutorial sets, `flag_gang_war_active`, isn't set
+/// again.
+pub const ENABLED: (u32, i32) = (MANSION_PASSED, 3);
+
+/// A split that happens once the territories side quest is enabled and enough
+/// territories are owned.
 pub struct Gate {
     /// The setting this gate splits on.
     pub split_id: &'static str,
-    /// Global variable counting the missions passed in a strand, and how many
-    /// of them have to be passed.
-    pub missions: Option<(u32, i32)>,
     /// Territories owned, in percent, needed.
     pub percent: i32,
 }
@@ -31,29 +40,27 @@ pub struct Gate {
 /// The splits. Each territory is 1/53 of the total at this point of the game
 /// (3 territories read 5.66% in game).
 pub static GATES: &[Gate] = &[
-    // 7 territories, which Grove 4 Life ends on: the 3 owned after Beat Down
-    // on B Dup plus 4 more, 7/53 = 13.21%. The global is an integer, and reads
-    // 13 whether the game truncates or rounds. 6 territories read 11.
-    Gate { split_id: "GT #1", missions: Some((GROVE_PASSED, 1)), percent: 13 },
+    // 7 territories: 7/53 = 13.21%. The global is an integer, and reads 13
+    // whether the game truncates or rounds. 6 territories read 11.
+    Gate { split_id: "GT #1", percent: 13 },
     // 35%, which takes 19 territories: 18 read 33 or 34. It's the share of
     // territories Sweet's call needs to unlock "End of the Line", which the
     // script holds back until more than 34% are owned (`player_territory_owned
     // > 34` in `cell_phone_LA2`).
-    Gate { split_id: "GT #2", missions: None, percent: 35 },
+    Gate { split_id: "GT #2", percent: 35 },
 ];
 
 impl Gate {
-    fn met(&self, missions: i32, owned: i32) -> bool {
-        let needed = self.missions.map_or(0, |(_, passed)| passed);
-        missions >= needed && owned >= self.percent
+    fn met(&self, enabled: i32, owned: i32) -> bool {
+        enabled >= ENABLED.1 && owned >= self.percent
     }
 
-    /// Whether the gate was met on this tick. Takes each value's
-    /// `(old, current)` pair (`missions` is ignored if the gate needs none),
-    /// and works whichever of the two conditions comes last: passing the
-    /// mission with the territories already taken, or taking them after.
-    pub fn just_met(&self, missions: (i32, i32), owned: (i32, i32)) -> bool {
-        self.met(missions.1, owned.1) && !self.met(missions.0, owned.0)
+    /// Whether the gate was met on this tick. Takes the `(old, current)` pair
+    /// of the `ENABLED` global and of `OWNED`, and works whichever of the two
+    /// conditions comes last: the side quest being enabled with the
+    /// territories already taken, or taking them after.
+    pub fn just_met(&self, enabled: (i32, i32), owned: (i32, i32)) -> bool {
+        self.met(enabled.1, owned.1) && !self.met(enabled.0, owned.0)
     }
 }
 
@@ -61,51 +68,50 @@ impl Gate {
 mod tests {
     use super::*;
 
+    /// The side quest being enabled, on the tick before and during.
+    const ON: (i32, i32) = (3, 3);
+    const OFF: (i32, i32) = (2, 2);
+
     fn gate(split_id: &str) -> &'static Gate {
         GATES.iter().find(|g| g.split_id == split_id).unwrap()
     }
 
     #[test]
-    fn gt2_is_met_when_the_territories_reach_35_percent() {
-        assert!(gate("GT #2").just_met((0, 0), (34, 35)));
-    }
-
-    #[test]
-    fn gt2_needs_more_than_34_percent() {
-        assert!(!gate("GT #2").just_met((0, 0), (33, 34)));
-    }
-
-    #[test]
-    fn gt2_only_on_the_tick_it_happens() {
-        let g = gate("GT #2");
-        assert!(!g.just_met((0, 0), (35, 40)));
-        assert!(!g.just_met((0, 0), (50, 50)));
-    }
-
-    #[test]
-    fn gt2_does_not_depend_on_missions() {
-        let g = gate("GT #2");
-        assert!(g.just_met((0, 0), (20, 40)));
-        assert!(g.just_met((2, 3), (34, 35)));
-    }
-
-    #[test]
-    fn gt1_is_the_seventh_territory_after_beat_down_on_b_dup() {
-        let g = gate("GT #1");
-        assert!(g.just_met((1, 1), (11, 13)));
-        // Beat Down on B Dup passed with the 7 territories already taken.
-        assert!(g.just_met((0, 1), (13, 13)));
+    fn gt1_is_met_by_the_seventh_territory() {
+        assert!(gate("GT #1").just_met(ON, (11, 13)));
     }
 
     #[test]
     fn gt1_is_not_met_by_six_territories() {
         // 6/53 is 11.32%, which reads 11 whether it truncates or rounds.
-        assert!(!gate("GT #1").just_met((0, 1), (11, 11)));
+        assert!(!gate("GT #1").just_met(ON, (10, 11)));
     }
 
     #[test]
-    fn gt1_needs_beat_down_on_b_dup() {
-        assert!(!gate("GT #1").just_met((0, 0), (11, 15)));
+    fn gt2_is_met_at_35_percent() {
+        assert!(gate("GT #2").just_met(ON, (34, 35)));
+    }
+
+    #[test]
+    fn gt2_needs_more_than_34_percent() {
+        assert!(!gate("GT #2").just_met(ON, (33, 34)));
+    }
+
+    #[test]
+    fn only_on_the_tick_it_happens() {
+        let g = gate("GT #2");
+        assert!(!g.just_met(ON, (35, 40)));
+        assert!(!g.just_met((3, 4), (50, 50)));
+    }
+
+    #[test]
+    fn not_before_the_side_quest_is_enabled() {
+        assert!(!gate("GT #1").just_met(OFF, (5, 20)));
+    }
+
+    #[test]
+    fn met_when_the_side_quest_is_enabled_with_the_territories_taken() {
+        assert!(gate("GT #1").just_met((2, 3), (15, 15)));
     }
 
     #[test]

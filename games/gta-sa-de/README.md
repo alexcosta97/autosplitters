@@ -118,14 +118,19 @@ Log messages are prefixed with `[GTASA:DE Autosplitter]`.
   ($713) that the game refreshes every 20 s, so they can come up to 20 s after
   the territory is taken, and it is logged whenever it changes. At this point
   each territory is 1/53 (3 territories read 5.66%).
-  - GT #1: Beat Down on B Dup is passed and the territories owned reach 13%,
-    which is 7 territories (the 3 owned after Beat Down on B Dup and 4 more).
-    7 read 13.21% and 6 read 11.32%. The global is a whole number, and reads 13
-    and 11 whether the game truncates or rounds.
+  - They only count once the territories side quest is enabled again on the
+    way back to Los Santos, whichever missions were done to get there. The
+    script does that when it passes the third Mansion mission, and has no flag
+    of its own for it, so the auto splitter looks at the Mansion missions
+    passed ($628) being at least 3, which the script raises in the same step.
+    Nothing else about the route is checked.
+  - GT #1: the territories owned reach 13%, which is 7 territories (the 3
+    owned after the side quest is enabled and 4 more). 7 read 13.21% and 6
+    read 11.32%. The global is a whole number, and reads 13 and 11 whether the
+    game truncates or rounds.
   - GT #2: the territories owned reach 35%, which takes 19 territories (18
     read 33 or 34). That is what Sweet's phone call needs to unlock "End of the
-    Line": the script only makes it once more than 34% are owned. No mission is
-    checked, so it splits at 35% whenever that is.
+    Line": the script only makes it once more than 34% are owned.
 - If the executable version can't be read, pattern scanning is still attempted
   instead of disabling the auto splitter.
 

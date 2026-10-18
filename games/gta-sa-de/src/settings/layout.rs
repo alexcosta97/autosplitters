@@ -178,12 +178,8 @@ pub fn build() -> Tree {
         );
         b.check("End of the Line Part 2", Some("End of the Line Part 2 (start of Chase)"), false);
         b.check("End of the Line Part 3", Some("End of the Line Part 3 (after Credits)"), false);
-        b.check(
-            "GT #1",
-            Some("Gang Territories #1 (7 territories, after Beat Down on B Dup)"),
-            false,
-        );
-        b.check("GT #2", Some("Gang Territories #2 (35% of the territories, 19)"), false);
+        b.check("GT #1", Some("Gang Territories #1 (7 territories, 13%)"), false);
+        b.check("GT #2", Some("Gang Territories #2 (19 territories, 35%)"), false);
         b.check("any%", Some("End of any% (start of Firetruck Bridge Cutscene)"), true);
     });
 

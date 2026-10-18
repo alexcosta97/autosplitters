@@ -490,9 +490,9 @@ impl Splitter {
         if owned.current != owned.old {
             debug(&format!("Territories owned: {}% -> {}%", owned.old, owned.current));
         }
+        let enabled = mem.global(territory::ENABLED.0).pair();
         for gate in territory::GATES {
-            let missions = gate.missions.map_or((0, 0), |(index, _)| mem.global(index).pair());
-            if gate.just_met(missions, owned.pair()) && self.try_split(gate.split_id) {
+            if gate.just_met(enabled, owned.pair()) && self.try_split(gate.split_id) {
                 return true;
             }
         }
