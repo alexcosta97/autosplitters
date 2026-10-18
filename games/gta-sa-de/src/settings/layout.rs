@@ -180,7 +180,7 @@ pub fn build() -> Tree {
         b.check("End of the Line Part 3", Some("End of the Line Part 3 (after Credits)"), false);
         b.check(
             "GT #1",
-            Some("Gang Territories #1 (4th territory, after Beat Down on B Dup)"),
+            Some("Gang Territories #1 (7 territories, after Beat Down on B Dup)"),
             false,
         );
         b.check("GT #2", Some("Gang Territories #2 (at starting of Cut Throat Business)"), false);

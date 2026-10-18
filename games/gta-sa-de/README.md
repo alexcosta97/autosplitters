@@ -120,11 +120,13 @@ Log messages are prefixed with `[GTASA:DE Autosplitter]`.
   comes once more than 34% are owned. It works whichever of the two comes
   last. The percentage is a script global ($713) that the game refreshes every
   20 s, so the split can come up to 20 s after the territory is taken.
-- "GT #1" splits on the 4th territory instead of on starting Grove 4 Life:
-  Beat Down on B Dup is passed and the territories owned reach 7%. At this
-  point each territory is 1/53 (3 territories read 5.66%), so 4 read 7.55%.
-  The global is a whole number, so that is 7 or 8, and 3 territories read 5 or
-  6; 7 is the first that means 4 either way. "GT #2" is unchanged and still
+- "GT #1" splits on the territories owned instead of on starting Grove 4 Life:
+  Beat Down on B Dup is passed and the territories owned reach 13%, which is
+  7 territories (the 3 owned after Beat Down on B Dup and 4 more). At this
+  point each territory is 1/53 (3 territories read 5.66%), so 7 read 13.21%
+  and 6 read 11.32%. The global is a whole number, and reads 13 and 11
+  whether the game truncates or rounds. The 35% for "End of the Line" takes
+  19 territories, since 18 read 33 or 34. "GT #2" is unchanged and still
   splits on starting Cut Throat Business. The percentage is logged whenever it
   changes.
 - If the executable version can't be read, pattern scanning is still attempted

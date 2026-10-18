@@ -32,11 +32,10 @@ pub struct Gate {
 /// The splits. Each territory is 1/53 of the total at this point of the game
 /// (3 territories read 5.66% in game).
 pub static GATES: &[Gate] = &[
-    // 4 territories, after Beat Down on B Dup and before Grove 4 Life: 7.55%.
-    // The global is an integer, so it reads 7 or 8 depending on whether the
-    // game truncates or rounds, and 3 territories read 5 or 6. 7 tells the
-    // 4th territory apart either way.
-    Gate { split_id: "GT #1", missions: GROVE_PASSED, missions_passed: 1, percent: 7 },
+    // 7 territories, which Grove 4 Life ends on: the 3 owned after Beat Down
+    // on B Dup plus 4 more, 7/53 = 13.21%. The global is an integer, and reads
+    // 13 whether the game truncates or rounds. 6 territories read 11.
+    Gate { split_id: "GT #1", missions: GROVE_PASSED, missions_passed: 1, percent: 13 },
     // "End of the Line" is unlocked once Los Desperados is passed and Sweet's
     // call comes, which the script holds back until more than 34% are owned
     // (`player_territory_owned > 34` in `cell_phone_LA2`).
@@ -93,32 +92,32 @@ mod tests {
     }
 
     #[test]
-    fn gt1_is_the_fourth_territory_after_beat_down_on_b_dup() {
+    fn gt1_is_the_seventh_territory_after_beat_down_on_b_dup() {
         let g = gate("GT #1");
-        // 4th territory, whether the percentage truncates (7) or rounds (8).
-        assert!(g.just_met((1, 1), (5, 7)));
-        assert!(g.just_met((1, 1), (6, 8)));
-        // Beat Down on B Dup passed with the 4th territory already taken.
-        assert!(g.just_met((0, 1), (7, 7)));
+        assert!(g.just_met((1, 1), (11, 13)));
+        // Beat Down on B Dup passed with the 7 territories already taken.
+        assert!(g.just_met((0, 1), (13, 13)));
     }
 
     #[test]
-    fn gt1_is_not_met_by_three_territories() {
-        let g = gate("GT #1");
-        // 3 territories read 5.66%, so 5 or 6.
-        assert!(!g.just_met((0, 1), (5, 5)));
-        assert!(!g.just_met((0, 1), (6, 6)));
+    fn gt1_is_not_met_by_six_territories() {
+        // 6/53 is 11.32%, which reads 11 whether it truncates or rounds.
+        assert!(!gate("GT #1").just_met((0, 1), (11, 11)));
     }
 
     #[test]
     fn gt1_needs_beat_down_on_b_dup() {
-        assert!(!gate("GT #1").just_met((0, 0), (5, 9)));
+        assert!(!gate("GT #1").just_met((0, 0), (11, 15)));
     }
 
     #[test]
-    fn four_territories_of_53_read_7_or_8() {
-        let exact: f64 = 4.0 * 100.0 / 53.0;
-        assert_eq!(exact as i32, 7);
-        assert_eq!(exact.round() as i32, 8);
+    fn territory_counts_read_the_same_truncated_or_rounded_where_it_matters() {
+        let percent = |n: f64| n * 100.0 / 53.0;
+        // GT #1 (7) and 6 territories before it.
+        assert_eq!((percent(7.0) as i32, percent(7.0).round() as i32), (13, 13));
+        assert_eq!((percent(6.0) as i32, percent(6.0).round() as i32), (11, 11));
+        // Unlocking End of the Line takes 19: 18 stay under 35.
+        assert!(percent(18.0).round() < 35.0);
+        assert!(percent(19.0) as i32 >= 35);
     }
 }
