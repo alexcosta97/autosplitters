@@ -113,6 +113,24 @@ Log messages are prefixed with `[GTASA:DE Autosplitter]`.
   from a save, so both are off by default: reloading a save during a run would
   otherwise reset it. Saves with under 5 s of play time don't count, so a New
   Game doesn't trigger them.
+- "GT #1" and "GT #2" split on the territories owned instead of on starting
+  Grove 4 Life and Cut Throat Business. The percentage is a script global
+  ($713) that the game refreshes every 20 s, so they can come up to 20 s after
+  the territory is taken, and it is logged whenever it changes. At this point
+  each territory is 1/53 (3 territories read 5.66%).
+  - They only count once the territories side quest is enabled again on the
+    way back to Los Santos, whichever missions were done to get there. The
+    script does that when it passes the third Mansion mission, and has no flag
+    of its own for it, so the auto splitter looks at the Mansion missions
+    passed ($628) being at least 3, which the script raises in the same step.
+    Nothing else about the route is checked.
+  - GT #1: the territories owned reach 13%, which is 7 territories (the 3
+    owned after the side quest is enabled and 4 more). 7 read 13.21% and 6
+    read 11.32%. The global is a whole number, and reads 13 and 11 whether the
+    game truncates or rounds.
+  - GT #2: the territories owned reach 35%, which takes 19 territories (18
+    read 33 or 34). That is what Sweet's phone call needs to unlock "End of the
+    Line": the script only makes it once more than 34% are owned.
 - If the executable version can't be read, pattern scanning is still attempted
   instead of disabling the auto splitter.
 
@@ -162,6 +180,10 @@ auto splitter. Thanks to everyone who worked on it:
 - **hoxi**: adapting it to the Definitive Edition.
 - **Parik**: the patterns for signature scanning and the global variable
   indexes.
+
+The global variable indexes were checked against the leaked DE main script
+([JuniorDjjr's gist](https://gist.github.com/JuniorDjjr/2129e1e7640f7969acdfb1c56c263155)),
+which the "leaked DE script source" mentioned above refers to.
 
 The notes in the source that name ASL variables (`$SWEET_TOTAL_PASSED_MISSIONS`
 and so on) come from their work.

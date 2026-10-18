@@ -76,7 +76,7 @@ pub static MISSIONS: &[(u32, &[(i32, &str)])] = &[
         (1, "Architectural Espionage"), (2, "Key to her Heart"), (3, "Dam and Blast"),
         (4, "Cop Wheels"), (5, "Up, Up and Away!"), (6, "Breaking the Bank at Caligula's"),
     ]),
-    (628, &[(1, "A Home in the Hills"), (2, "Vertical Bird"), (3, "Home Coming"), (4, "Cut Throat Business")]), // $MANSION_TOTAL_PASSED_MISSIONS
+    (MANSION_PASSED, &[(1, "A Home in the Hills"), (2, "Vertical Bird"), (3, "Home Coming"), (4, "Cut Throat Business")]), // $MANSION_TOTAL_PASSED_MISSIONS
     (629, &[(1, "Beat Down on B Dup"), (2, "Grove 4 Life")]), // $GROVE_TOTAL_PASSED_MISSIONS
     (631, &[ // $RIOT_TOTAL_PASSED_MISSIONS
         (1, "Riot"), (2, "Los Desperados"), (3, "End of the Line Part 1"),
@@ -236,8 +236,6 @@ pub static EXPORT_LISTS: [[&str; 10]; 3] = [
 /// Split when a certain thread was started, usually when a mission was started.
 #[rustfmt::skip]
 pub static START_MISSIONS: &[(&str, &str)] = &[
-    ("grove2", "GT #1"),  // Grove 4 Life
-    ("manson5", "GT #2"), // Cut Throat Business
     ("steal", "Wang Cars (Showroom Bought)"),
     ("planes", "Plane Flight"),
     ("psch", "Verdant Meadows (Safehouse)"),
@@ -245,6 +243,8 @@ pub static START_MISSIONS: &[(&str, &str)] = &[
 ];
 
 // Global variables that aren't missions
+/// $MANSION_TOTAL_PASSED_MISSIONS, the Mansion strand's missions passed.
+pub const MANSION_PASSED: u32 = 628;
 pub const EOTL: u32 = 9436;
 pub const CHILIAD_RACE: u32 = 3218;
 pub const CHILIAD_DONE: u32 = 3220;
