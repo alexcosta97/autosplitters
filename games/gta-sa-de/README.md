@@ -119,9 +119,14 @@ Log messages are prefixed with `[GTASA:DE Autosplitter]`.
   Desperados, Sweet's phone call that lets you start "End of the Line" only
   comes once more than 34% are owned. It works whichever of the two comes
   last. The percentage is a script global ($713) that the game refreshes every
-  20 s, so the split can come up to 20 s after the territory is taken. "GT #1"
-  and "GT #2" are unchanged: they still split on starting Grove 4 Life and Cut
-  Throat Business, whatever the percentage.
+  20 s, so the split can come up to 20 s after the territory is taken.
+- "GT #1" splits on the 4th territory instead of on starting Grove 4 Life:
+  Beat Down on B Dup is passed and the territories owned reach 7%. At this
+  point each territory is 1/53 (3 territories read 5.66%), so 4 read 7.55%.
+  The global is a whole number, so that is 7 or 8, and 3 territories read 5 or
+  6; 7 is the first that means 4 either way. "GT #2" is unchanged and still
+  splits on starting Cut Throat Business. The percentage is logged whenever it
+  changes.
 - If the executable version can't be read, pattern scanning is still attempted
   instead of disabling the auto splitter.
 

@@ -485,13 +485,17 @@ impl Splitter {
             }
         }
 
-        // Gang territories unlocking "End of the Line"
-        let unlocked = territory::just_unlocked(
-            mem.global(data::RIOT_PASSED).pair(),
-            mem.global(territory::OWNED).pair(),
-        );
-        if unlocked && self.try_split("Territories Unlock") {
-            return true;
+        // Gang territories
+        let owned = mem.global(territory::OWNED);
+        if owned.current != owned.old {
+            debug(&format!("Territories owned: {}% -> {}%", owned.old, owned.current));
+        }
+        for gate in territory::GATES {
+            if gate.just_met(mem.global(gate.missions).pair(), owned.pair())
+                && self.try_split(gate.split_id)
+            {
+                return true;
+            }
         }
 
         // End of any%
