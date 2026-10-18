@@ -1,13 +1,13 @@
 //! Splits on the gang territories owned.
 //!
 //! The game keeps the percentage of territories owned in a script global,
-//! `player_territory_owned`, which is what these read. Each split also needs a
+//! `player_territory_owned`, which is what these read. A split can also need a
 //! number of missions of a strand passed, so it happens at the right point of
 //! the story.
 //!
 //! Doesn't touch `asr`, so it can be tested on the host.
 
-use crate::data::{GROVE_PASSED, RIOT_PASSED};
+use crate::data::GROVE_PASSED;
 
 /// `player_territory_owned`: the percentage of territories owned, 0 to 100.
 ///
@@ -16,15 +16,14 @@ use crate::data::{GROVE_PASSED, RIOT_PASSED};
 /// phone call check itself, so it can be up to 20 s behind.
 pub const OWNED: u32 = 713;
 
-/// A split that happens once some missions are passed and enough territories
-/// are owned.
+/// A split that happens once enough territories are owned, and some missions
+/// are passed if it needs them.
 pub struct Gate {
     /// The setting this gate splits on.
     pub split_id: &'static str,
-    /// Global variable counting the missions passed in a strand.
-    pub missions: u32,
-    /// Missions of that strand that have to be passed.
-    pub missions_passed: i32,
+    /// Global variable counting the missions passed in a strand, and how many
+    /// of them have to be passed.
+    pub missions: Option<(u32, i32)>,
     /// Territories owned, in percent, needed.
     pub percent: i32,
 }
@@ -35,22 +34,24 @@ pub static GATES: &[Gate] = &[
     // 7 territories, which Grove 4 Life ends on: the 3 owned after Beat Down
     // on B Dup plus 4 more, 7/53 = 13.21%. The global is an integer, and reads
     // 13 whether the game truncates or rounds. 6 territories read 11.
-    Gate { split_id: "GT #1", missions: GROVE_PASSED, missions_passed: 1, percent: 13 },
-    // "End of the Line" is unlocked once Los Desperados is passed and Sweet's
-    // call comes, which the script holds back until more than 34% are owned
-    // (`player_territory_owned > 34` in `cell_phone_LA2`).
-    Gate { split_id: "Territories Unlock", missions: RIOT_PASSED, missions_passed: 2, percent: 35 },
+    Gate { split_id: "GT #1", missions: Some((GROVE_PASSED, 1)), percent: 13 },
+    // 35%, which takes 19 territories: 18 read 33 or 34. It's the share of
+    // territories Sweet's call needs to unlock "End of the Line", which the
+    // script holds back until more than 34% are owned (`player_territory_owned
+    // > 34` in `cell_phone_LA2`).
+    Gate { split_id: "GT #2", missions: None, percent: 35 },
 ];
 
 impl Gate {
     fn met(&self, missions: i32, owned: i32) -> bool {
-        missions >= self.missions_passed && owned >= self.percent
+        let needed = self.missions.map_or(0, |(_, passed)| passed);
+        missions >= needed && owned >= self.percent
     }
 
     /// Whether the gate was met on this tick. Takes each value's
-    /// `(old, current)` pair, and works whichever of the two conditions comes
-    /// last: passing the mission with the territories already taken, or
-    /// taking them after.
+    /// `(old, current)` pair (`missions` is ignored if the gate needs none),
+    /// and works whichever of the two conditions comes last: passing the
+    /// mission with the territories already taken, or taking them after.
     pub fn just_met(&self, missions: (i32, i32), owned: (i32, i32)) -> bool {
         self.met(missions.1, owned.1) && !self.met(missions.0, owned.0)
     }
@@ -65,30 +66,27 @@ mod tests {
     }
 
     #[test]
-    fn unlocks_when_the_territories_reach_the_minimum_after_los_desperados() {
-        assert!(gate("Territories Unlock").just_met((2, 2), (34, 35)));
+    fn gt2_is_met_when_the_territories_reach_35_percent() {
+        assert!(gate("GT #2").just_met((0, 0), (34, 35)));
     }
 
     #[test]
-    fn unlocks_when_los_desperados_is_passed_with_the_territories_taken() {
-        assert!(gate("Territories Unlock").just_met((1, 2), (60, 60)));
+    fn gt2_needs_more_than_34_percent() {
+        assert!(!gate("GT #2").just_met((0, 0), (33, 34)));
     }
 
     #[test]
-    fn needs_more_than_34_percent() {
-        assert!(!gate("Territories Unlock").just_met((2, 2), (33, 34)));
+    fn gt2_only_on_the_tick_it_happens() {
+        let g = gate("GT #2");
+        assert!(!g.just_met((0, 0), (35, 40)));
+        assert!(!g.just_met((0, 0), (50, 50)));
     }
 
     #[test]
-    fn does_not_unlock_before_los_desperados() {
-        assert!(!gate("Territories Unlock").just_met((1, 1), (50, 100)));
-    }
-
-    #[test]
-    fn only_on_the_tick_it_happens() {
-        let g = gate("Territories Unlock");
-        assert!(!g.just_met((2, 2), (35, 40)));
-        assert!(!g.just_met((2, 3), (50, 50)));
+    fn gt2_does_not_depend_on_missions() {
+        let g = gate("GT #2");
+        assert!(g.just_met((0, 0), (20, 40)));
+        assert!(g.just_met((2, 3), (34, 35)));
     }
 
     #[test]
@@ -116,7 +114,7 @@ mod tests {
         // GT #1 (7) and 6 territories before it.
         assert_eq!((percent(7.0) as i32, percent(7.0).round() as i32), (13, 13));
         assert_eq!((percent(6.0) as i32, percent(6.0).round() as i32), (11, 11));
-        // Unlocking End of the Line takes 19: 18 stay under 35.
+        // GT #2 (35%) takes 19: 18 stay under 35.
         assert!(percent(18.0).round() < 35.0);
         assert!(percent(19.0) as i32 >= 35);
     }

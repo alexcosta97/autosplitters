@@ -236,7 +236,6 @@ pub static EXPORT_LISTS: [[&str; 10]; 3] = [
 /// Split when a certain thread was started, usually when a mission was started.
 #[rustfmt::skip]
 pub static START_MISSIONS: &[(&str, &str)] = &[
-    ("manson5", "GT #2"), // Cut Throat Business
     ("steal", "Wang Cars (Showroom Bought)"),
     ("planes", "Plane Flight"),
     ("psch", "Verdant Meadows (Safehouse)"),
