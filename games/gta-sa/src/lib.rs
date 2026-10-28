@@ -120,21 +120,21 @@ async fn init(process: &Process, name: &str, settings: &mut Settings) -> Option<
         v300_steam: read(4),
         v101_steam: read(5),
     };
+    let all = [
+        values.v100_eu,
+        values.v100_us,
+        values.v101_eu,
+        values.v101_us,
+        values.v300_steam,
+        values.v101_steam,
+    ];
     let Some(version) = Version::detect(size, &values) else {
-        let all = [
-            values.v100_eu,
-            values.v100_us,
-            values.v101_eu,
-            values.v101_us,
-            values.v300_steam,
-            values.v101_steam,
-        ];
         debug(&format!(
             "Unknown version (module size {size}, version values {all:?}), auto splitter disabled"
         ));
         return None;
     };
-    debug(&format!("Version: {}", version.name()));
+    debug(&format!("Version: {} (module size {size}, version values {all:?})", version.name()));
     Some(Memory { base, addrs: Addresses::for_version(version), globals: data::global_addresses() })
 }
 

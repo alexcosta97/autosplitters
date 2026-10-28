@@ -4,7 +4,8 @@ Port of the GTA San Andreas (original PC release) ASL auto splitter to the
 LiveSplit auto splitting runtime, so it works in LiveSplit One and with games
 running under Proton. It behaves like the ASL; the
 [differences](#differences-from-the-asl) are about how settings and timing
-work in the runtime. See [Credits](#credits) for where it comes from.
+work in the runtime, plus one fix (the list of splits already done is also
+cleared when the timer is reset). See [Credits](#credits) for where it comes from.
 
 ## Download
 
@@ -49,10 +50,11 @@ Detected, as in the ASL: 1.0, 1.01, 2.00, 3.00 Steam, 1.01 Steam and Steam
 (the newer Steam release). The version is recognised from values in the game's
 memory and from the module size. An unrecognised build disables the auto
 splitter, as in the ASL, and logs its module size and the version values it
-read.
+read. A detected version is logged with its module size too.
 
-Tested: not yet tested in-game; 1.0 under Proton and the current Steam release
-will be tested before release.
+Tested: not yet tested in-game. Versions 1.01, 2.00, 3.00 Steam and 1.01 Steam
+are ported from the ASL but not tested; 1.0 under Proton and the current Steam
+release will be tested before release.
 
 ## Differences from the ASL
 
@@ -62,6 +64,11 @@ will be tested before release.
   auto splitter keeps in sync with its checkboxes: All ticks every checkbox in
   the section, None unticks them, and Selection shows when only some are
   ticked.
+- The settings are regrouped and reordered. The ASL's Main Missions and Side
+  Missions trees are replaced by top-level headings: Story missions, Asset
+  missions, Schools and vehicles, Races and stadium, Challenges and gyms,
+  Import/Export, Property purchases, Collectibles and Other. Missions are under
+  headings per mission giver, and Properties by area.
 - There's no gating: every split is decided by its own checkbox. The ASL's
   parent switches (`Missions`, `Missions2`, `LS`, `Races`, `Export Lists`,
   `Other`, `Collectibles`, ...) no longer apply as saved values. Every other
@@ -76,6 +83,8 @@ will be tested before release.
 - Start, reset and split run in the same order as LiveSplit's ASL runner:
   reset or split only while the timer is running or paused, and start after a
   reset in the same tick.
+- A failed memory read keeps the previous value, so it never looks like a
+  change. The ASL's watchers left the old values stale.
 - The 500 ms load guard and 2.5 s double-split guard are counted in ticks (30
   per second, `refreshRate = 30`), because there's no clock without WASI.
 - The list of splits already done is also cleared when the auto splitter
@@ -83,9 +92,10 @@ will be tested before release.
   not running, which never happens when a reset is followed by a start in the
   same tick, so splits from the previous attempt wouldn't fire again.
 - The version is detected from the PE header's image size (falling back to the
-  module size), the ASL's `ModuleMemorySize`, plus the same version values. An
-  unknown version disables the auto splitter, as in the ASL, and logs its
-  module size and version values.
+  module size), the ASL's `ModuleMemorySize`, plus the same version values. The
+  detected version is logged with its module size, and an unknown version
+  (which disables the auto splitter, as in the ASL) also logs the version
+  values.
 
 ## Suspected ASL issues to check in-game
 
