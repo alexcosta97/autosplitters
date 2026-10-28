@@ -282,8 +282,9 @@ impl Splitter {
     /// Check if splitting should occur based on whether this split has
     /// already been split since the timer started.
     ///
-    /// If this returns true (the split should occur), the split is also added
-    /// to the list of already split splits.
+    /// Returns true if the split should occur. See
+    /// `gta_sa_common::attempt::Attempt::try_split`: the split is also added
+    /// to the list of already split splits when the cooldown prevents it.
     fn try_split(&mut self, split_id: &str) -> bool {
         if !self.settings.get(split_id) {
             return false;
