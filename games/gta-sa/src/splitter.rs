@@ -112,7 +112,6 @@ impl Splitter {
     }
 
     /// Same logic as starting the timer to have both run in the same cycle.
-    /// Same logic as starting the timer to have both run in the same cycle.
     /// Whether the ASL's `reset` returns true; the `reset` setting (LiveSplit's
     /// Reset checkbox) only decides in `run` whether the timer is reset.
     pub fn reset(&self, v: &Values) -> bool {
@@ -148,8 +147,9 @@ impl Splitter {
     /// Check if splitting should occur based on whether this split has
     /// already been split since the timer started.
     ///
-    /// If this returns true (the split should occur), the split is also added
-    /// to the list of already split splits.
+    /// Returns true if the split should occur. See
+    /// `gta_sa_common::attempt::Attempt::try_split`: the split is also added
+    /// to the list of already split splits when the cooldown prevents it.
     fn try_split(&mut self, split_id: &str, s: &impl Toggles) -> bool {
         if !s.get(split_id) {
             return false;
@@ -637,6 +637,52 @@ mod tests {
         let mut sp = Splitter::new();
         let unchanged = values(&[F::Ped(55, 55), F::G(0x64A490, 1, 1), F::G(0x64A10C, 0, 0)]);
         assert!(!tick(&mut sp, &unchanged, &s));
+    }
+
+    #[test]
+    fn second_warp_branches() {
+        let mut sp = Splitter::new();
+        // King in Exile passed, Small Town Bank not.
+        let busted = values(&[F::Ped(1, 63), F::G(0x64BB2C, 1, 1), F::G(0x64A48C, 0, 0)]);
+        assert!(tick(&mut sp, &busted, &toggles(&[("Bustedwarp BL #2", true)])));
+
+        let mut sp = Splitter::new();
+        // Body Harvest passed, King in Exile not.
+        let wasted = values(&[F::Ped(1, 55), F::G(0x64A10C, 1, 1), F::G(0x64BB2C, 0, 0)]);
+        assert!(tick(&mut sp, &wasted, &toggles(&[("Deathwarp BL #2", true)])));
+
+        let mut sp = Splitter::new();
+        // The Da Nang Thang passed, Yay Ka-Boom-Boom not.
+        let sf = values(&[F::Ped(1, 55), F::G(0x64A1DC, 5, 5), F::G(0x64A1E4, 0, 0)]);
+        assert!(tick(&mut sp, &sf, &toggles(&[])));
+        let mut sp = Splitter::new();
+        let done = values(&[F::Ped(1, 55), F::G(0x64A1DC, 5, 5), F::G(0x64A1E4, 10, 10)]);
+        assert!(!tick(&mut sp, &done, &toggles(&[])));
+    }
+
+    #[test]
+    fn unchanged_thread_does_not_split() {
+        let s = toggles(&[("GT #1", true)]);
+        let mut sp = Splitter::new();
+        assert!(!tick(&mut sp, &values(&[F::Thread("grove2", "grove2")]), &s));
+    }
+
+    #[test]
+    fn counter_with_setting_off_does_not_stop_the_loop() {
+        // Big Smoke's counter rises first in the list; its setting is off, but
+        // the later counter still splits.
+        let s = toggles(&[("Big Smoke", false)]);
+        let mut sp = Splitter::new();
+        let v = values(&[BIG_SMOKE, F::G(0x64A490, 0, 1)]);
+        assert!(tick(&mut sp, &v, &s));
+    }
+
+    #[test]
+    fn chiliad_through_should_split() {
+        let s = toggles(&[]);
+        let mut sp = Splitter::new();
+        let v = values(&[F::G(data::CHILIAD_RACE, 1, 2), F::G(data::CHILIAD_DONE, 0, 0)]);
+        assert!(tick(&mut sp, &v, &s));
     }
 
     #[test]
