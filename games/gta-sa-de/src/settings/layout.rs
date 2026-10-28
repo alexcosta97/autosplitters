@@ -10,49 +10,11 @@
 use alloc::format;
 
 use crate::data::{self, QUARRY, TRUCKING};
+use gta_sa_common::names::{
+    self, BL_MISSIONS, DESERT_MISSIONS, LS_MISSIONS, LV_MISSIONS, PROPERTIES, RTLS_MISSIONS,
+    SF_MISSIONS,
+};
 use gta_sa_common::settings::tree::{Builder, Tree};
-
-// Story missions, in the order the ASL listed them.
-#[rustfmt::skip]
-static LS_MISSIONS: &[&str] = &[
-    "Big Smoke", "Ryder", "Tagging up Turf", "Cleaning the Hood", "Drive-Thru",
-    "Nines and AKs", "OG Loc", "Life's a Beach", "Running Dog", "Drive-By",
-    "Sweet's Girl", "Cesar Vialpando", "High Stakes Lowrider", "Madd Dogg's Rhymes",
-    "Management Issues", "House Party (Cutscene)", "Burning Desire",
-    "Wrong Side of the Tracks", "Just Business", "Doberman", "Gray Imports",
-    "Home Invasion", "House Party", "Catalyst", "Robbing Uncle Sam", "Los Sepulcros",
-    "Reuniting the Families", "The Green Sabre",
-];
-#[rustfmt::skip]
-static BL_MISSIONS: &[&str] = &[
-    "Badlands", "Tanker Commander", "Body Harvest", "King in Exile",
-    "Small Town Bank", "Local Liquor Store", "Against All Odds", "Wu Zi Mu",
-    "Farewell, My Love", "Are You Going To San Fierro?",
-];
-#[rustfmt::skip]
-static SF_MISSIONS: &[&str] = &[
-    "Wear Flowers in your Hair", "555 WE TIP", "Deconstruction", "Photo Opportunity",
-    "Jizzy (Cutscene)", "Jizzy", "T-Bone Mendez", "Mike Toreno", "Outrider",
-    "Snail Trail", "Mountain Cloud Boys", "Ran Fa Li", "Lure", "Ice Cold Killa",
-    "Amphibious Assault", "Pier 69", "Toreno's Last Flight", "The Da Nang Thang",
-    "Yay Ka-Boom-Boom",
-];
-#[rustfmt::skip]
-static DESERT_MISSIONS: &[&str] = &[
-    "Monster", "Highjack", "Interdiction", "Verdant Meadows", "Learning to Fly",
-];
-#[rustfmt::skip]
-static LV_MISSIONS: &[&str] = &[
-    "N.O.E.", "Freefall", "Fender Ketchup", "Explosive Situation", "You've Had Your Chips",
-    "Don Peyote", "Intensive Care", "The Meat Business", "Fish in a Barrel", "Madd Dogg",
-    "Misappropriation", "Stowaway", "Black Project", "High Noon", "Green Goo",
-    "Saint Mark's Bistro",
-];
-#[rustfmt::skip]
-static RTLS_MISSIONS: &[&str] = &[
-    "A Home in the Hills", "Vertical Bird", "Home Coming", "Beat Down on B Dup",
-    "Grove 4 Life", "Cut Throat Business", "Riot", "Los Desperados",
-];
 
 // Mission givers of the big sections: heading and the `data::MISSIONS` global
 // counting their missions. Ordered by the first of their missions in the lists
@@ -69,37 +31,6 @@ static SF_GIVERS: &[(&str, u32)] = &[
 #[rustfmt::skip]
 static LV_GIVERS: &[(&str, u32)] = &[
     ("Toreno", 595), ("Casino", 599), ("Madd Dogg", 601), ("C.R.A.S.H.", 600),
-];
-
-#[rustfmt::skip]
-static PROPERTIES: &[(&str, &[&str])] = &[
-    ("Businesses", &[
-        "Zero (RC Shop Bought)", "Wang Cars (Showroom Bought)", "Verdant Meadows (Safehouse)",
-    ]),
-    ("Los Santos safehouses", &[
-        "Santa Maria Beach (Safehouse)", "Mulholland (Safehouse)", "Verona Beach (Safehouse)",
-        "Willowfield (Safehouse)", "Jefferson (Safehouse)", "Verdant Bluffs (Safehouse)",
-    ]),
-    ("San Fierro safehouses", &[
-        "Calton Heights (Safehouse)", "Paradiso (Safehouse)", "Hashbury (Safehouse)",
-        "Chinatown (Safehouse)", "Doherty (Safehouse)",
-    ]),
-    ("Las Venturas safehouses", &[
-        "Rockshore West (Safehouse)", "Prickle Pine (Safehouse)", "Whitewood Estate (Safehouse)",
-        "Redsands West (Safehouse)", "Creek (Safehouse)",
-    ]),
-    ("Countryside safehouses", &[
-        "Palomino Creek (Safehouse)", "Blueberry (Safehouse)", "Dillimore (Safehouse)",
-        "Angel Pine (Safehouse)", "Whetstone (Safehouse)",
-    ]),
-    ("Desert safehouses", &[
-        "Fort Carson (Safehouse)", "El Quebrados (Safehouse)", "Tierra Robada (Safehouse)",
-    ]),
-    ("Hotel suites", &[
-        "Pirates In Men's Pants (Hotel Suite)", "The Camel's Toe (Hotel Suite)",
-        "Queens (Hotel Suite)", "Old Venturas Strip (Hotel Suite)",
-        "The Clown's Pocket (Hotel Suite)",
-    ]),
 ];
 
 /// The global of `data::MISSIONS` counting this mission.
@@ -233,7 +164,7 @@ pub fn build() -> Tree {
 
     b.heading("Import/Export", "Import/Export", 0);
     b.section("Export Lists", "Export Lists", 1, |b| {
-        for (i, list) in data::EXPORT_LISTS.iter().enumerate() {
+        for (i, list) in names::EXPORT_LISTS.iter().enumerate() {
             let n = i + 1;
             // "All done" replaces the ASL's "Export List n Complete", split
             // by the export code in `lib.rs` rather than `completion`.
@@ -263,7 +194,7 @@ pub fn build() -> Tree {
     // Collectibles
     //=============
     b.heading("Collectibles", "Collectibles", 0);
-    for (kind, _) in data::COLLECTIBLES {
+    for kind in names::COLLECTIBLE_KINDS {
         b.collectible(kind);
     }
 

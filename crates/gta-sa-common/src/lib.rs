@@ -4,4 +4,8 @@
 #![cfg_attr(not(test), no_std)]
 extern crate alloc;
 
+pub mod attempt;
+pub mod names;
+pub mod pair;
+pub mod rules;
 pub mod settings;

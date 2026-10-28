@@ -28,6 +28,10 @@ use asr::{
     Address, PointerSize, Process,
 };
 
+use gta_sa_common::attempt::{Attempt, Outcome};
+use gta_sa_common::names;
+use gta_sa_common::pair::Pair;
+use gta_sa_common::rules;
 use settings::Settings;
 use triggers::{Events, Triggers};
 
@@ -178,27 +182,6 @@ impl Addresses {
 // Memory Watcher
 //=============================================================================
 
-#[derive(Copy, Clone, Default)]
-struct Pair<T> {
-    old: T,
-    current: T,
-}
-
-impl<T: Copy> Pair<T> {
-    /// Keeps the previous value if the read failed, so a failed read can't
-    /// look like a value change.
-    fn update(&mut self, value: Option<T>) {
-        self.old = self.current;
-        if let Some(value) = value {
-            self.current = value;
-        }
-    }
-
-    fn pair(self) -> (T, T) {
-        (self.old, self.current)
-    }
-}
-
 struct Memory {
     base: Address,
     addrs: Addresses,
@@ -210,7 +193,7 @@ struct Memory {
     start_flag: Pair<u8>,
     thread: Pair<[u8; 8]>,
     play_time: Pair<i32>,
-    /// Parallel to `data::COLLECTIBLES`.
+    /// Parallel to `names::COLLECTIBLE_KINDS`.
     collectibles: Vec<Pair<i32>>,
 }
 
@@ -248,11 +231,12 @@ impl Memory {
         }));
         self.play_time.update(process.read(base + a.play_time).ok());
 
-        for (pair, (kind, stat_id)) in self.collectibles.iter_mut().zip(data::COLLECTIBLES) {
+        let collectibles = names::COLLECTIBLE_KINDS.iter().zip(data::COLLECTIBLES);
+        for (pair, (kind, stat_id)) in self.collectibles.iter_mut().zip(collectibles) {
             let addr = if *kind == "Tags" {
                 a.tags
             } else {
-                a.stat_base.map(|s| s + (*stat_id as u64 - 120) * 4)
+                a.stat_base.map(|s| s + (stat_id as u64 - 120) * 4)
             };
             pair.update(addr.and_then(|addr| process.read(base + addr).ok()));
         }
@@ -278,14 +262,12 @@ impl Memory {
 struct Splitter {
     settings: Settings,
     /// Already split splits during this attempt (until timer reset).
-    split: Vec<String>,
+    attempt: Attempt,
     prev_phase: Option<TimerState>,
     tick: u64,
     /// Tick when the last load occurred (loading from a save and such, not
     /// load screens).
     last_load: Option<u64>,
-    /// Tick when the last split was executed (to prevent double-splits).
-    last_split: Option<u64>,
     waiting: bool,
     triggers: Triggers,
     /// What can start or reset the timer that happened on this tick.
@@ -306,42 +288,37 @@ impl Splitter {
         if !self.settings.get(split_id) {
             return false;
         }
-        if self.split.iter().any(|s| s == split_id) {
-            return false;
-        }
-        self.split.push(split_id.into());
         // Double split prevention (mostly for duping). This is set to 2.5s so
         // that dupes should (hopefully) not split twice, whereas close-on
         // splits like the Deathwarp to Angel Pine after Body Harvest still do
         // get split.
-        //
-        // Always add this to the already executed splits, so that
-        // cooldown-prevented splits are not split if a savegame is loaded and
-        // the dupe done again.
-        if !self.settings.get("doubleSplitPrevention")
-            || self.ticks_since(self.last_split) > SPLIT_COOLDOWN_TICKS
-        {
-            debug(&format!("Split: {split_id}"));
-            self.last_split = Some(self.tick);
-            true
-        } else {
-            debug(&format!("Split Prevented (Cooldown): {split_id}"));
-            false
+        let prevention = self.settings.get("doubleSplitPrevention");
+        match self.attempt.try_split(split_id, prevention, self.tick, SPLIT_COOLDOWN_TICKS) {
+            Outcome::AlreadyDone => false,
+            Outcome::Split => {
+                debug(&format!("Split: {split_id}"));
+                true
+            }
+            Outcome::Cooldown => {
+                debug(&format!("Split Prevented (Cooldown): {split_id}"));
+                false
+            }
         }
     }
 
     /// Check if the given mission (the name has to be exact) has already been
     /// passed, based on the current memory value.
     fn passed(&self, mem: &Memory, mission: &str) -> bool {
-        for (index, missions) in data::MISSIONS {
-            if let Some((value, _)) = missions.iter().find(|(_, m)| *m == mission) {
-                let current = mem.global(*index).current;
+        match rules::passed(data::MISSIONS, mission, |index| mem.global(index).current) {
+            Some((value, current)) => {
                 debug(&format!("Check: {mission} {value} >= {current}"));
-                return current >= *value;
+                current >= value
+            }
+            None => {
+                debug(&format!("Mission not found: {mission}"));
+                false
             }
         }
-        debug(&format!("Mission not found: {mission}"));
-        false
     }
 
     fn update(&mut self, mem: &Memory) {
@@ -363,7 +340,7 @@ impl Splitter {
         let phase = timer::state();
         if Some(phase) != self.prev_phase {
             if phase == TimerState::NotRunning {
-                self.split.clear();
+                self.attempt.clear();
                 debug("Cleared list of already executed splits");
             }
             self.prev_phase = Some(phase);
@@ -389,7 +366,7 @@ impl Splitter {
             || (self.events.save_loaded && self.settings.get("resetOnSaveLoad"));
         if reset {
             debug("Reset");
-            self.split.clear();
+            self.attempt.clear();
             return true;
         }
         false
@@ -438,36 +415,28 @@ impl Splitter {
 
         // Split missions
         for (index, missions) in data::MISSIONS {
-            let value = mem.global(*index);
-            if value.current > value.old {
-                if let Some((_, split_id)) = missions.iter().find(|(v, _)| *v == value.current) {
-                    if self.try_split(split_id) {
-                        return true;
-                    }
+            if let Some(split_id) = rules::counter_split(missions, mem.global(*index).pair()) {
+                if self.try_split(split_id) {
+                    return true;
                 }
             }
         }
 
         for (_, missions) in data::MISSIONS2 {
             for (index, split_id) in missions.iter() {
-                let value = mem.global(*index);
                 // Some values changes from 0 -> 2, so check for > 0
-                if value.current > 0 && value.old == 0 {
+                if rules::flag_set(mem.global(*index).pair()) {
                     return self.try_split(split_id);
                 }
             }
         }
 
         // Split collectibles
-        for (value, (kind, _)) in mem.collectibles.iter().zip(data::COLLECTIBLES) {
+        for (value, kind) in mem.collectibles.iter().zip(names::COLLECTIBLE_KINDS) {
             if value.current > value.old {
                 let all = format!("{kind}All");
                 if self.settings.get(&all) {
-                    let max = match *kind {
-                        "Tags" => 100,
-                        "Stunts (Completed)" => 70,
-                        _ => 50,
-                    };
+                    let max = rules::collectible_max(kind);
                     if value.current == max && value.old == max - 1 {
                         return self.try_split(&all);
                     }
@@ -476,9 +445,8 @@ impl Splitter {
                     // Need to keep track of already split splits separately
                     // from the setting
                     let split_name = format!("{kind} {}", value.current);
-                    if !self.split.contains(&split_name) {
+                    if self.attempt.first_time(&split_name) {
                         debug(&format!("Split: {split_name}"));
-                        self.split.push(split_name);
                         return true;
                     }
                 }
@@ -530,12 +498,8 @@ impl Splitter {
         // been done.
         let chiliad_race = mem.global(data::CHILIAD_RACE);
         let chiliad_done = mem.global(data::CHILIAD_DONE);
-        if (chiliad_race.current > chiliad_race.old
-            && chiliad_race.current > 1
-            && chiliad_done.current == 0)
-            || chiliad_done.current > chiliad_done.old
+        if let Some(race_done) = rules::chiliad_race_done(chiliad_race.pair(), chiliad_done.pair())
         {
-            let race_done = if chiliad_done.current == 1 { 3 } else { chiliad_race.current - 1 };
             return self.try_split(&format!("Chiliad Challenge #{race_done}"));
         }
 
@@ -546,28 +510,18 @@ impl Splitter {
         // to 1 when that car is exported. This is per list, so which vehicles
         // the values refer to changes based on which list is active.
         let export_list = mem.global(data::EXPORT_LIST).current;
-        if (0..=2).contains(&export_list) {
-            let mut all_done = true;
-            let mut exported = None;
-            for i in 0..10 {
-                let vehicle = mem.global(data::EXPORT_BASE + i);
-                if vehicle.current == 1 && vehicle.old == 0 {
-                    exported = Some(i as usize);
-                }
-                if vehicle.current == 0 {
-                    all_done = false;
-                }
+        let vehicles = core::array::from_fn(|i| mem.global(data::EXPORT_BASE + i as u32).pair());
+        if let Some(exported) = rules::exported(export_list, vehicles) {
+            let vehicle = names::EXPORT_LISTS[exported.list][exported.vehicle];
+            if self.try_split(&format!("Export {vehicle}")) {
+                return true;
             }
-            if let Some(i) = exported {
-                let list = export_list as usize;
-                if self.try_split(&format!("Export {}", data::EXPORT_LISTS[list][i])) {
-                    return true;
-                }
-                // The list's "All done" option, which replaced the ASL's
-                // "Export List n Complete" (and unticks the vehicles).
-                if all_done && self.try_split(&format!("Export List {}#allDone", list + 1)) {
-                    return true;
-                }
+            // The list's "All done" option, which replaced the ASL's
+            // "Export List n Complete" (and unticks the vehicles).
+            if exported.all_done
+                && self.try_split(&format!("Export List {}#allDone", exported.list + 1))
+            {
+                return true;
             }
         }
 
@@ -630,11 +584,10 @@ async fn main() {
 
     let mut splitter = Splitter {
         settings: settings::register(),
-        split: Vec::new(),
+        attempt: Attempt::new(),
         prev_phase: None,
         tick: 0,
         last_load: None,
-        last_split: None,
         waiting: false,
         triggers: Triggers::new(),
         events: Events::default(),
