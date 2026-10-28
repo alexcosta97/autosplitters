@@ -4,4 +4,4 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-asr = { git = "https://github.com/LiveSplit/asr" }
+asr = { git = "https://github.com/LiveSplit/asr", features = ["alloc"] }
