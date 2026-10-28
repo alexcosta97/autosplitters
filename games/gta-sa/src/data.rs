@@ -356,6 +356,7 @@ pub fn global_addresses() -> Vec<u32> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use alloc::vec;
 
     #[test]
     fn tables_match_the_asl() {
@@ -388,6 +389,22 @@ mod tests {
         names.sort_unstable();
         names.dedup();
         assert_eq!(names.len(), total);
+    }
+
+    #[test]
+    fn global_addresses_cover_the_watched_globals() {
+        let all = global_addresses();
+        let mut unique = all.clone();
+        unique.sort_unstable();
+        unique.dedup();
+        assert_eq!(unique.len(), all.len());
+        let mut expected = vec![EOTL, CHILIAD_RACE, CHILIAD_DONE, EXPORT_LIST];
+        expected.extend((0..10).map(|i| EXPORT_BASE + i * 4));
+        expected.extend(MISSIONS.iter().map(|(addr, _)| *addr));
+        expected.extend(MISSIONS2.iter().flat_map(|(_, e)| e.iter().map(|(addr, _)| *addr)));
+        for addr in expected {
+            assert!(all.contains(&addr), "{addr:#X}");
+        }
     }
 
     #[test]
