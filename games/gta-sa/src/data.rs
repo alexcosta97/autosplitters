@@ -317,10 +317,7 @@ pub static MISSIONS2: &[(&str, &[(u32, &str)])] = &[
 
 /// The entries of `MISSIONS2` in the group called `group`.
 pub fn missions2(group: &str) -> &'static [(u32, &'static str)] {
-    MISSIONS2
-        .iter()
-        .find(|(name, _)| *name == group)
-        .map_or(&[], |(_, entries)| entries)
+    MISSIONS2.iter().find(|(name, _)| *name == group).map_or(&[], |(_, entries)| entries)
 }
 
 /// Split when a certain thread was started, usually when a mission was started.
@@ -367,14 +364,24 @@ mod tests {
         assert_eq!(
             groups,
             [
-                "Schools", "Vehicle Submissions", "Properties", "Freight", "Gym Moves",
-                "Challenges", "Assets", "LS Races", "SF Races", "LV Races", "Air Races",
+                "Schools",
+                "Vehicle Submissions",
+                "Properties",
+                "Freight",
+                "Gym Moves",
+                "Challenges",
+                "Assets",
+                "LS Races",
+                "SF Races",
+                "LV Races",
+                "Air Races",
                 "Stadium Events",
             ]
         );
         let dirt = missions2("Stadium Events").iter().find(|(_, n)| *n == "Dirt Track");
         assert_eq!(dirt.map(|(a, _)| *a), Some(0xA4BDB8));
-        let mut names: Vec<&str> = MISSIONS.iter().flat_map(|(_, e)| e.iter().map(|(_, n)| *n)).collect();
+        let mut names: Vec<&str> =
+            MISSIONS.iter().flat_map(|(_, e)| e.iter().map(|(_, n)| *n)).collect();
         names.extend(MISSIONS2.iter().flat_map(|(_, e)| e.iter().map(|(_, n)| *n)));
         names.extend(START_MISSIONS.iter().map(|(_, n)| *n));
         let total = names.len();
@@ -389,4 +396,3 @@ mod tests {
         assert_eq!(kinds, gta_sa_common::names::COLLECTIBLE_KINDS);
     }
 }
-
