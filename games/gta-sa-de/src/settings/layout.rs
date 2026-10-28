@@ -9,8 +9,8 @@
 
 use alloc::format;
 
-use super::tree::{Builder, Tree};
 use crate::data::{self, QUARRY, TRUCKING};
+use gta_sa_common::settings::tree::{Builder, Tree};
 
 // Story missions, in the order the ASL listed them.
 #[rustfmt::skip]
@@ -354,7 +354,8 @@ mod tests {
     use alloc::{collections::BTreeMap, format, string::String, vec::Vec};
 
     use super::*;
-    use crate::{completion, settings::tree::Kind};
+    use crate::completion;
+    use gta_sa_common::settings::tree::Kind;
 
     /// What every setting of the old tree (with the "Enable splits in this
     /// section" switches) did with no saved settings, `key<TAB>true|false`.

@@ -9,6 +9,8 @@ asr = { git = "https://github.com/LiveSplit/asr", features = [
     "signature", # Scanning signatures.
 ] }
 
+gta-sa-common = { path = "../../crates/gta-sa-common" }
+
 # Heap allocator
 dlmalloc = { version = "0.2.4", features = ["global"] }
 

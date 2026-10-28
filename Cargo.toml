@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["games/*"]
+members = ["games/*", "crates/*"]
 
 # Auto splitters are loaded by the timer on every start, so keep them small.
 [profile.release]
