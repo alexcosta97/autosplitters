@@ -351,7 +351,7 @@ static DEFAULTS_100: &[(&str, bool)] = &[
 
 #[cfg(test)]
 mod tests {
-    use alloc::{collections::BTreeMap, string::String, vec::Vec};
+    use alloc::{collections::BTreeMap, format, string::String, vec::Vec};
 
     use super::*;
     use crate::{completion, settings::tree::Kind};
@@ -497,6 +497,27 @@ mod tests {
             counted.sort();
             assert_eq!(counted, expected, "{key}");
         }
+    }
+
+    /// Every widget of the layout, one line each: `key<TAB>label<TAB>kind<TAB>tooltip`.
+    #[test]
+    fn widgets_match_snapshot() {
+        let lines: Vec<String> = build()
+            .widgets
+            .iter()
+            .map(|w| {
+                let kind = match &w.kind {
+                    Kind::Title { level } => format!("title:{level}"),
+                    Kind::Bool { default } => format!("bool:{default}"),
+                    Kind::Choice { options, default } => {
+                        let keys: Vec<&str> = options.iter().map(|(k, _)| *k).collect();
+                        format!("choice:{default}:{}", keys.join(","))
+                    }
+                };
+                format!("{}\t{}\t{kind}\t{}", w.key, w.label, w.tooltip.unwrap_or(""))
+            })
+            .collect();
+        assert_eq!(lines.join("\n"), include_str!("widgets.snap").trim_end_matches('\n'));
     }
 
     #[test]
