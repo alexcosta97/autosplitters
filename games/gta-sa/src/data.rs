@@ -271,12 +271,12 @@ pub static MISSIONS2: &[(&str, &[(u32, &str)])] = &[
         (0x64B710, "Valet Parking Complete"), // $1900
         (0x64B0B4, "Quarry Complete"), // $MISSION_QUARRY_PASSED ($1493)
     ]),
-        // Races addresses are based on the global variable $RACES_WON ($2300), which
-        // is an array. The number in the comment is the $RACE_INDEX ($352).
-        //
-        // Missing are races that are already done during story missions:
-        // Lowrider Race (0), Badlands A (7), Badlands B (8)
-        //
+    // Races addresses are based on the global variable $RACES_WON ($2300), which
+    // is an array. The number in the comment is the $RACE_INDEX ($352).
+    //
+    // Missing are races that are already done during story missions:
+    // Lowrider Race (0), Badlands A (7), Badlands B (8)
+    //
     ("LS Races", &[
         (0x64BD54, "Little Loop"), // 1
         (0x64BD58, "Backroad Wanderer"), // 2

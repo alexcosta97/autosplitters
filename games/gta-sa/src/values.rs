@@ -33,6 +33,11 @@ pub struct Values {
 impl Values {
     /// The values after the first read: old and current are the same, so
     /// nothing looks changed.
+    ///
+    /// A failed first read seeds 0 (the type's default). The ASL's watchers
+    /// instead seed on their first successful read. That's harmless: a failed
+    /// read (a null ped pointer at the menu, say) can't produce a 55 or 63, or
+    /// a counter value that makes a split.
     pub fn first(r: &Reading) -> Values {
         let seed = |value: Option<i32>| Pair::new(value.unwrap_or_default());
         Values {
