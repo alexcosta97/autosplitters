@@ -17,6 +17,9 @@ mod data;
 // Task 5 uses this.
 #[allow(dead_code)]
 mod version;
+// Task 5 uses this.
+#[allow(dead_code)]
+mod settings;
 
 use asr::future::next_tick;
 
