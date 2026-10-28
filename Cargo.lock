@@ -63,6 +63,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "gta-sa-autosplitter"
+version = "0.1.0"
+dependencies = [
+ "asr",
+ "dlmalloc",
+ "gta-sa-common",
+]
+
+[[package]]
 name = "gta-sa-common"
 version = "0.1.0"
 dependencies = [
