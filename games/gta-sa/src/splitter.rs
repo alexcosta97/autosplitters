@@ -20,6 +20,16 @@ const SPLIT_COOLDOWN_TICKS: u64 = TICK_RATE * 5 / 2; // 2.5 s
 pub enum Phase {
     NotRunning,
     Running,
+    Paused,
+    Ended,
+}
+
+/// The timer, as `run` drives it.
+pub trait Timer {
+    fn phase(&self) -> Phase;
+    fn start(&mut self);
+    fn split(&mut self);
+    fn reset(&mut self);
 }
 
 pub fn debug(text: &str) {
@@ -48,7 +58,7 @@ impl Splitter {
     }
 
     /// Equivalent of the ASL's `update` block, minus reading memory. Call
-    /// once per tick, before the others.
+    /// once per tick, before the others (`run` does).
     pub fn update(&mut self, phase: Phase) {
         self.tick += 1;
         // Clear list of already executed splits if timer is reset
@@ -93,7 +103,8 @@ impl Splitter {
         // Optional starting the timer when loading a save. The "loading" value
         // seems to only be true when loading a game initially (so not loading
         // screens during the game).
-        if s.get("startOnSaveLoad") && !v.loading.current && v.loading.old {
+        // Like New Game, only if starting is enabled (`start`).
+        if s.get("start") && s.get("startOnSaveLoad") && !v.loading.current && v.loading.old {
             debug("Loaded Save");
             return true;
         }
@@ -101,14 +112,37 @@ impl Splitter {
     }
 
     /// Same logic as starting the timer to have both run in the same cycle.
-    pub fn reset(&mut self, v: &Values, s: &impl Toggles) -> bool {
-        if Self::new_game(v) && s.get("reset") {
-            debug("Reset");
-            // Not in the ASL: the list is cleared on the reset itself too.
-            self.attempt.clear();
-            return true;
+    /// Same logic as starting the timer to have both run in the same cycle.
+    /// Whether the ASL's `reset` returns true; the `reset` setting (LiveSplit's
+    /// Reset checkbox) only decides in `run` whether the timer is reset.
+    pub fn reset(&self, v: &Values) -> bool {
+        Self::new_game(v)
+    }
+
+    /// One tick, the way LiveSplit's ASL runner (`ASLScript.RunUpdate`)
+    /// calls the blocks: reset or else split while running or paused, then
+    /// start if the timer is (now) not running.
+    pub fn run(&mut self, v: &Values, s: &impl Toggles, timer: &mut impl Timer) {
+        let phase = timer.phase();
+        self.update(phase);
+        if matches!(phase, Phase::Running | Phase::Paused) {
+            if self.reset(v) {
+                if s.get("reset") {
+                    // Only output when actually resetting.
+                    debug("Reset");
+                    // Not in the ASL: the list is cleared on the reset itself
+                    // too, since a start in the same tick hides the phase
+                    // change from `update`.
+                    self.attempt.clear();
+                    timer.reset();
+                }
+            } else if self.should_split(v, s) {
+                timer.split();
+            }
         }
-        false
+        if timer.phase() == Phase::NotRunning && self.start(v, s) {
+            timer.start();
+        }
     }
 
     /// Check if splitting should occur based on whether this split has
@@ -303,7 +337,7 @@ impl Splitter {
 
 #[cfg(test)]
 mod tests {
-    use alloc::{collections::BTreeMap, string::String};
+    use alloc::{collections::BTreeMap, string::String, vec::Vec};
 
     use super::*;
     use crate::{data, settings};
@@ -400,20 +434,119 @@ mod tests {
         let v = values(&[F::Loading(true, false)]);
         assert!(!sp.start(&v, &toggles(&[])));
         assert!(sp.start(&v, &toggles(&[("startOnSaveLoad", true)])));
+        // The start setting (LiveSplit's Start checkbox) gates every start.
+        let no_start = toggles(&[("startOnSaveLoad", true), ("start", false)]);
+        assert!(!sp.start(&v, &no_start));
         let still_loading = values(&[F::Loading(true, true)]);
         assert!(!sp.start(&still_loading, &toggles(&[("startOnSaveLoad", true)])));
     }
 
+    /// A timer that changes phase like LiveSplit's.
+    struct FakeTimer {
+        phase: Phase,
+        actions: Vec<&'static str>,
+    }
+
+    impl FakeTimer {
+        fn new(phase: Phase) -> Self {
+            Self { phase, actions: Vec::new() }
+        }
+    }
+
+    impl Timer for FakeTimer {
+        fn phase(&self) -> Phase {
+            self.phase
+        }
+        fn start(&mut self) {
+            self.phase = Phase::Running;
+            self.actions.push("start");
+        }
+        fn split(&mut self) {
+            self.actions.push("split");
+        }
+        fn reset(&mut self) {
+            self.phase = Phase::NotRunning;
+            self.actions.push("reset");
+        }
+    }
+
+    /// One tick of the runner; what it did to the timer.
+    fn run(sp: &mut Splitter, t: &mut FakeTimer, v: &Values, s: &Test) -> Vec<&'static str> {
+        t.actions.clear();
+        sp.run(v, s, t);
+        t.actions.clone()
+    }
+
+    fn new_game_and(fields: &[F]) -> Values {
+        let mut v = values(&[F::Time(0, 1000), F::Thread("intro", "intro")]);
+        let more = values(fields);
+        v.globals = more.globals;
+        v
+    }
+
     #[test]
-    fn new_game_while_running_resets_and_clears() {
+    fn reset_is_the_new_game_condition() {
+        let sp = Splitter::new();
+        assert!(sp.reset(&values(&[F::Time(0, 1000), F::Thread("intro", "intro")])));
+        assert!(!sp.reset(&values(&[F::Time(0, 1000), F::Thread("grove2", "grove2")])));
+    }
+
+    #[test]
+    fn new_game_while_running_resets_clears_and_starts() {
         let mut sp = Splitter::new();
         let s = toggles(&[]);
-        assert!(tick(&mut sp, &values(&[BIG_SMOKE]), &s));
-        let new_game = values(&[F::Time(0, 1000), F::Thread("intro", "intro")]);
-        assert!(!sp.reset(&new_game, &toggles(&[("reset", false)])));
-        assert!(sp.reset(&new_game, &s));
-        idle(&mut sp, &s);
-        assert!(tick(&mut sp, &values(&[BIG_SMOKE]), &s));
+        let mut t = FakeTimer::new(Phase::Running);
+        assert_eq!(run(&mut sp, &mut t, &values(&[BIG_SMOKE]), &s), ["split"]);
+        for _ in 0..SPLIT_COOLDOWN_TICKS + 1 {
+            assert!(run(&mut sp, &mut t, &values(&[]), &s).is_empty());
+        }
+        // Reset and start in the same tick: the phase never shows NotRunning
+        // to `update`, so only the reset itself clears the list.
+        assert_eq!(run(&mut sp, &mut t, &new_game_and(&[]), &s), ["reset", "start"]);
+        assert_eq!(t.phase, Phase::Running);
+        for _ in 0..SPLIT_COOLDOWN_TICKS + 1 {
+            assert!(run(&mut sp, &mut t, &values(&[]), &s).is_empty());
+        }
+        assert_eq!(run(&mut sp, &mut t, &values(&[BIG_SMOKE]), &s), ["split"]);
+    }
+
+    #[test]
+    fn new_game_with_reset_off_does_not_split() {
+        let mut sp = Splitter::new();
+        let s = toggles(&[("reset", false)]);
+        let mut t = FakeTimer::new(Phase::Running);
+        assert!(run(&mut sp, &mut t, &new_game_and(&[BIG_SMOKE]), &s).is_empty());
+        assert_eq!(t.phase, Phase::Running);
+        // Nothing recorded: the split happens on a later change.
+        assert_eq!(run(&mut sp, &mut t, &values(&[BIG_SMOKE]), &s), ["split"]);
+    }
+
+    #[test]
+    fn no_reset_or_split_while_ended() {
+        let mut sp = Splitter::new();
+        let s = toggles(&[]);
+        let mut t = FakeTimer::new(Phase::Ended);
+        assert!(run(&mut sp, &mut t, &new_game_and(&[]), &s).is_empty());
+        assert!(run(&mut sp, &mut t, &values(&[BIG_SMOKE]), &s).is_empty());
+        assert_eq!(t.phase, Phase::Ended);
+    }
+
+    #[test]
+    fn splits_while_paused() {
+        let mut sp = Splitter::new();
+        let s = toggles(&[]);
+        let mut t = FakeTimer::new(Phase::Paused);
+        assert_eq!(run(&mut sp, &mut t, &values(&[BIG_SMOKE]), &s), ["split"]);
+        assert_eq!(run(&mut sp, &mut t, &new_game_and(&[]), &s), ["reset", "start"]);
+    }
+
+    #[test]
+    fn starts_only_when_not_running() {
+        let mut sp = Splitter::new();
+        let s = toggles(&[("reset", false)]);
+        let mut t = FakeTimer::new(Phase::NotRunning);
+        assert_eq!(run(&mut sp, &mut t, &new_game_and(&[]), &s), ["start"]);
+        assert!(run(&mut sp, &mut t, &new_game_and(&[]), &s).is_empty());
     }
 
     #[test]

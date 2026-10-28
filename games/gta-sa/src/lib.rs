@@ -64,6 +64,34 @@ impl Memory {
     }
 }
 
+/// The runtime's timer.
+struct AsrTimer;
+
+impl splitter::Timer for AsrTimer {
+    fn phase(&self) -> Phase {
+        match timer::state() {
+            TimerState::NotRunning => Phase::NotRunning,
+            TimerState::Running => Phase::Running,
+            TimerState::Paused => Phase::Paused,
+            TimerState::Ended => Phase::Ended,
+            // Unknown states: no start, reset or split, as with Ended.
+            _ => Phase::Ended,
+        }
+    }
+
+    fn start(&mut self) {
+        timer::start();
+    }
+
+    fn split(&mut self) {
+        timer::split();
+    }
+
+    fn reset(&mut self) {
+        timer::reset();
+    }
+}
+
 /// The module's base address and size, once the module is mapped.
 fn module(process: &Process, name: &str) -> Option<(Address, u64)> {
     let base = process.get_module_address(name).ok()?;
@@ -139,33 +167,7 @@ async fn main() {
                     settings.update();
                     values.update(&mem.read(&process));
 
-                    let state = timer::state();
-                    let phase = match state {
-                        TimerState::NotRunning => Phase::NotRunning,
-                        _ => Phase::Running,
-                    };
-                    splitter.update(phase);
-
-                    match state {
-                        TimerState::NotRunning => {
-                            if splitter.start(&values, &settings) {
-                                timer::start();
-                            }
-                        }
-                        TimerState::Running | TimerState::Paused | TimerState::Ended => {
-                            if splitter.reset(&values, &settings) {
-                                timer::reset();
-                                // Reset and start in the same cycle, as the
-                                // ASL's comment intends.
-                                if splitter.start(&values, &settings) {
-                                    timer::start();
-                                }
-                            } else if splitter.should_split(&values, &settings) {
-                                timer::split();
-                            }
-                        }
-                        _ => {}
-                    }
+                    splitter.run(&values, &settings, &mut AsrTimer);
 
                     next_tick().await;
                 }
