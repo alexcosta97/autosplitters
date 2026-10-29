@@ -122,7 +122,7 @@ impl Splitter {
     /// calls the blocks: reset or else split while running or paused, then
     /// start if the timer is (now) not running.
     pub fn run(&mut self, v: &Values, s: &impl Toggles, timer: &mut impl Timer) {
-        let phase = timer.phase();
+        let mut phase = timer.phase();
         self.update(phase);
         if matches!(phase, Phase::Running | Phase::Paused) {
             if self.reset(v) {
@@ -134,12 +134,16 @@ impl Splitter {
                     // change from `update`.
                     self.attempt.clear();
                     timer.reset();
+                    // Not asked again: a remote timer (LiveSplit through
+                    // the bridge) still reports Running for a moment, which
+                    // would miss the start.
+                    phase = Phase::NotRunning;
                 }
             } else if self.should_split(v, s) {
                 timer.split();
             }
         }
-        if timer.phase() == Phase::NotRunning && self.start(v, s) {
+        if phase == Phase::NotRunning && self.start(v, s) {
             timer.start();
         }
     }
@@ -445,11 +449,26 @@ mod tests {
     struct FakeTimer {
         phase: Phase,
         actions: Vec<&'static str>,
+        /// Report the new phase only from the next tick, like a remote timer.
+        lagging: bool,
+        pending: Option<Phase>,
     }
 
     impl FakeTimer {
         fn new(phase: Phase) -> Self {
-            Self { phase, actions: Vec::new() }
+            Self { phase, actions: Vec::new(), lagging: false, pending: None }
+        }
+
+        fn lagging(phase: Phase) -> Self {
+            Self { lagging: true, ..Self::new(phase) }
+        }
+
+        fn set(&mut self, phase: Phase) {
+            if self.lagging {
+                self.pending = Some(phase);
+            } else {
+                self.phase = phase;
+            }
         }
     }
 
@@ -458,14 +477,14 @@ mod tests {
             self.phase
         }
         fn start(&mut self) {
-            self.phase = Phase::Running;
+            self.set(Phase::Running);
             self.actions.push("start");
         }
         fn split(&mut self) {
             self.actions.push("split");
         }
         fn reset(&mut self) {
-            self.phase = Phase::NotRunning;
+            self.set(Phase::NotRunning);
             self.actions.push("reset");
         }
     }
@@ -474,6 +493,9 @@ mod tests {
     fn run(sp: &mut Splitter, t: &mut FakeTimer, v: &Values, s: &Test) -> Vec<&'static str> {
         t.actions.clear();
         sp.run(v, s, t);
+        if let Some(phase) = t.pending.take() {
+            t.phase = phase;
+        }
         t.actions.clone()
     }
 
@@ -508,6 +530,15 @@ mod tests {
             assert!(run(&mut sp, &mut t, &values(&[]), &s).is_empty());
         }
         assert_eq!(run(&mut sp, &mut t, &values(&[BIG_SMOKE]), &s), ["split"]);
+    }
+
+    #[test]
+    fn new_game_resets_and_starts_a_lagging_timer() {
+        let mut sp = Splitter::new();
+        let s = toggles(&[]);
+        let mut t = FakeTimer::lagging(Phase::Running);
+        assert_eq!(run(&mut sp, &mut t, &new_game_and(&[]), &s), ["reset", "start"]);
+        assert_eq!(t.phase, Phase::Running);
     }
 
     #[test]
