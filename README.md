@@ -11,6 +11,7 @@ auto splitting runtime component, and in
 
 | Game | Folder | Download |
 |---|---|---|
+| Grand Theft Auto: San Andreas (original PC release) | [`games/gta-sa`](games/gta-sa) | `gta-sa.wasm` from the latest `gta-sa-v*` [release](https://github.com/alexcosta97/autosplitters/releases) |
 | Grand Theft Auto: San Andreas – The Definitive Edition | [`games/gta-sa-de`](games/gta-sa-de) | `gta-sa-de.wasm` from the latest `gta-sa-de-v*` [release](https://github.com/alexcosta97/autosplitters/releases) |
 
 Each game's README explains how to use it and credits the people whose work it
@@ -40,7 +41,7 @@ target come from `rust-toolchain.toml`.
 
 ```sh
 cargo build --release                           # every game
-cargo build --release -p gta-sa-de-autosplitter # one game
+cargo build --release -p gta-sa-autosplitter    # one game
 ```
 
 The `.wasm` files are in `target/wasm32-unknown-unknown/release/`.
@@ -49,7 +50,7 @@ Logic that doesn't need the runtime is tested on the host:
 
 ```sh
 cargo test-host                                 # every game
-cargo test-host -p gta-sa-de-autosplitter       # one game
+cargo test-host -p gta-sa-autosplitter          # one game
 ```
 
 Before pushing, run the same checks as CI:

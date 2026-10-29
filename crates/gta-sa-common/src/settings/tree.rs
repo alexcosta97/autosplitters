@@ -240,7 +240,6 @@ impl Tree {
     }
 
     /// The checkbox keys in a section, and whether it offers "All done".
-    #[cfg(test)]
     pub fn section(&self, key: &str) -> (Vec<&str>, bool) {
         let dropdown = format!("{key}#section");
         let s = self
@@ -253,7 +252,6 @@ impl Tree {
     }
 
     /// The keys of the sections offering "All done".
-    #[cfg(test)]
     pub fn all_done_sections(&self) -> Vec<&str> {
         self.sections
             .iter()
@@ -279,6 +277,12 @@ pub struct Builder {
     tree: Tree,
     /// The sections the next widgets go into, outermost first.
     open: Vec<usize>,
+}
+
+impl Default for Builder {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl Builder {
@@ -447,7 +451,6 @@ impl Builder {
     }
 }
 
-#[cfg(test)]
 impl Source for BTreeMap<String, Value> {
     fn get_bool(&self, key: &str) -> Option<bool> {
         match self.get(key)? {

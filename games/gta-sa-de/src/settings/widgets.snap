@@ -1,0 +1,333 @@
+General#title	General	title:0	
+start	Start timer on New Game	bool:true	
+reset	Reset timer on New Game	bool:true	
+startOnSaveLoad	Start timer on loading a save	bool:false	For practising part of a run from a save
+resetOnSaveLoad	Reset timer on loading a save	bool:false	Starts it again if "Start timer on loading a save" is on
+doubleSplitPrevention	Double-Split Prevention	bool:true	Impose cooldown of 2.5s between auto-splits.
+This may not work for all types of splits.
+Story missions#title	Story missions	title:0	Main Missions and other splits that commonly occur in the any% route
+LS#title	Los Santos	title:1	
+LS#section	Splits in this section	choice:all:none,all,selection	None unticks every split below, All ticks them all. Ticking or unticking splits below updates this.
+LS Intro#title	Intro	title:2	
+Big Smoke	Big Smoke	bool:true	
+Ryder	Ryder	bool:true	
+LS Sweet#title	Sweet	title:2	
+Tagging up Turf	Tagging up Turf	bool:true	
+Cleaning the Hood	Cleaning the Hood	bool:true	
+Drive-Thru	Drive-Thru	bool:true	
+Nines and AKs	Nines and AKs	bool:true	
+Drive-By	Drive-By	bool:true	
+Sweet's Girl	Sweet's Girl	bool:true	
+Cesar Vialpando	Cesar Vialpando	bool:true	
+Doberman	Doberman	bool:true	
+Los Sepulcros	Los Sepulcros	bool:true	
+LS Big Smoke#title	Big Smoke	title:2	
+OG Loc	OG Loc	bool:true	
+Running Dog	Running Dog	bool:true	
+Wrong Side of the Tracks	Wrong Side of the Tracks	bool:true	
+Just Business	Just Business	bool:true	
+LS OG Loc#title	OG Loc	title:2	
+Life's a Beach	Life's a Beach	bool:true	
+Madd Dogg's Rhymes	Madd Dogg's Rhymes	bool:true	
+Management Issues	Management Issues	bool:true	
+House Party (Cutscene)	House Party (Cutscene)	bool:true	
+House Party	House Party	bool:true	
+LS Cesar#title	Cesar	title:2	
+High Stakes Lowrider	High Stakes Lowrider	bool:true	
+LS C.R.A.S.H.#title	C.R.A.S.H.	title:2	
+Burning Desire	Burning Desire	bool:true	
+Gray Imports	Gray Imports	bool:true	
+LS Ryder#title	Ryder	title:2	
+Home Invasion	Home Invasion	bool:true	
+Catalyst	Catalyst	bool:true	
+Robbing Uncle Sam	Robbing Uncle Sam	bool:true	
+LS Finale#title	Finale	title:2	
+Reuniting the Families	Reuniting the Families	bool:true	
+The Green Sabre	The Green Sabre	bool:true	
+BL#title	Badlands	title:1	
+BL#section	Splits in this section	choice:all:none,all,selection	None unticks every split below, All ticks them all. Ticking or unticking splits below updates this.
+Badlands	Badlands	bool:true	
+Tanker Commander	Tanker Commander	bool:true	
+Body Harvest	Body Harvest	bool:true	
+King in Exile	King in Exile	bool:true	
+Small Town Bank	Small Town Bank	bool:true	
+Local Liquor Store	Local Liquor Store	bool:true	
+Against All Odds	Against All Odds	bool:true	
+Wu Zi Mu	Wu Zi Mu	bool:true	
+Farewell, My Love	Farewell, My Love	bool:true	
+Are You Going To San Fierro?	Are You Going To San Fierro?	bool:true	
+SF#title	San Fierro	title:1	
+SF#section	Splits in this section	choice:all:none,all,selection	None unticks every split below, All ticks them all. Ticking or unticking splits below updates this.
+SF Garage#title	Garage	title:2	
+Wear Flowers in your Hair	Wear Flowers in your Hair	bool:true	
+Deconstruction	Deconstruction	bool:true	
+SF C.R.A.S.H.#title	C.R.A.S.H.	title:2	
+555 WE TIP	555 WE TIP	bool:true	
+Snail Trail	Snail Trail	bool:true	
+SF Syndicate#title	Syndicate	title:2	
+Photo Opportunity	Photo Opportunity	bool:true	
+Jizzy (Cutscene)	Jizzy (Cutscene)	bool:true	
+Jizzy	Jizzy	bool:true	
+T-Bone Mendez	T-Bone Mendez	bool:true	
+Mike Toreno	Mike Toreno	bool:true	
+Outrider	Outrider	bool:true	
+Ice Cold Killa	Ice Cold Killa	bool:true	
+Pier 69	Pier 69	bool:true	
+Toreno's Last Flight	Toreno's Last Flight	bool:true	
+Yay Ka-Boom-Boom	Yay Ka-Boom-Boom	bool:true	
+SF Wu Zi Mu#title	Wu Zi Mu	title:2	
+Mountain Cloud Boys	Mountain Cloud Boys	bool:true	
+Ran Fa Li	Ran Fa Li	bool:true	
+Lure	Lure	bool:true	
+Amphibious Assault	Amphibious Assault	bool:true	
+The Da Nang Thang	The Da Nang Thang	bool:true	
+Desert#title	Desert	title:1	
+Desert#section	Splits in this section	choice:all:none,all,selection	None unticks every split below, All ticks them all. Ticking or unticking splits below updates this.
+Monster	Monster	bool:true	
+Highjack	Highjack	bool:true	
+Interdiction	Interdiction	bool:true	
+Verdant Meadows	Verdant Meadows	bool:true	
+Learning to Fly	Learning to Fly	bool:true	
+LV#title	Las Venturas	title:1	
+LV#section	Splits in this section	choice:all:none,all,selection	None unticks every split below, All ticks them all. Ticking or unticking splits below updates this.
+LV Toreno#title	Toreno	title:2	
+N.O.E.	N.O.E.	bool:true	
+Stowaway	Stowaway	bool:true	
+Black Project	Black Project	bool:true	
+Green Goo	Green Goo	bool:true	
+LV Casino#title	Casino	title:2	
+Freefall	Freefall	bool:true	
+Fender Ketchup	Fender Ketchup	bool:true	
+Explosive Situation	Explosive Situation	bool:true	
+You've Had Your Chips	You've Had Your Chips	bool:true	
+Don Peyote	Don Peyote	bool:true	
+Intensive Care	Intensive Care	bool:true	
+The Meat Business	The Meat Business	bool:true	
+Fish in a Barrel	Fish in a Barrel	bool:true	
+Saint Mark's Bistro	Saint Mark's Bistro	bool:true	
+LV Madd Dogg#title	Madd Dogg	title:2	
+Madd Dogg	Madd Dogg	bool:true	
+LV C.R.A.S.H.#title	C.R.A.S.H.	title:2	
+Misappropriation	Misappropriation	bool:true	
+High Noon	High Noon	bool:true	
+RTLS#title	Return to Los Santos	title:1	
+RTLS#section	Splits in this section	choice:selection:none,all,selection	None unticks every split below, All ticks them all. Ticking or unticking splits below updates this.
+A Home in the Hills	A Home in the Hills	bool:true	
+Vertical Bird	Vertical Bird	bool:true	
+Home Coming	Home Coming	bool:true	
+Beat Down on B Dup	Beat Down on B Dup	bool:true	
+Grove 4 Life	Grove 4 Life	bool:true	
+Cut Throat Business	Cut Throat Business	bool:true	
+Riot	Riot	bool:true	
+Los Desperados	Los Desperados	bool:true	
+RTLS Ending#title	Ending	title:2	
+End of the Line Part 1	End of the Line Part 1 (after killing Big Smoke)	bool:false	
+End of the Line Part 2	End of the Line Part 2 (start of Chase)	bool:true	
+End of the Line Part 3	End of the Line Part 3 (after Credits)	bool:true	
+GT #1	Gang Territories #1 (7 territories, 13%)	bool:true	
+GT #2	Gang Territories #2 (19 territories, 35%)	bool:true	
+any%	End of any% (start of Firetruck Bridge Cutscene)	bool:false	
+Asset missions#title	Asset missions	title:0	
+HeistMissions#title	Heist	title:1	
+HeistMissions#section	Splits in this section	choice:all:none,all,selection,alldone	None unticks every split below, All ticks them all. All done splits once, when everything below is done. Ticking or unticking splits below updates this.
+Architectural Espionage	Architectural Espionage	bool:true	
+Key to her Heart	Key to her Heart	bool:true	
+Dam and Blast	Dam and Blast	bool:true	
+Cop Wheels	Cop Wheels	bool:true	
+Up, Up and Away!	Up, Up and Away!	bool:true	
+Breaking the Bank at Caligula's	Breaking the Bank at Caligula's	bool:true	
+ZeroMissions#title	Zero	title:1	
+ZeroMissions#section	Splits in this section	choice:all:none,all,selection,alldone	None unticks every split below, All ticks them all. All done splits once, when everything below is done. Ticking or unticking splits below updates this.
+Air Raid	Air Raid	bool:true	
+Supply Lines...	Supply Lines...	bool:true	
+New Model Army	New Model Army	bool:true	
+Wang CarsMissions#title	Wang Cars	title:1	
+Wang CarsMissions#section	Splits in this section	choice:all:none,all,selection,alldone	None unticks every split below, All ticks them all. All done splits once, when everything below is done. Ticking or unticking splits below updates this.
+Zeroing In	Zeroing In	bool:true	
+Test Drive	Test Drive	bool:true	
+Customs Fast Track	Customs Fast Track	bool:true	
+Puncture Wounds	Puncture Wounds	bool:true	
+TruckingMissions#title	Trucking	title:1	
+TruckingMissions#section	Splits in this section	choice:all:none,all,selection,alldone	None unticks every split below, All ticks them all. All done splits once, when everything below is done. Ticking or unticking splits below updates this.
+Trucking 1	Trucking 1	bool:true	
+Trucking 2	Trucking 2	bool:true	
+Trucking 3	Trucking 3	bool:true	
+Trucking 4	Trucking 4	bool:true	
+Trucking 5	Trucking 5	bool:true	
+Trucking 6	Trucking 6	bool:true	
+Trucking 7	Trucking 7	bool:true	
+Trucking 8	Trucking 8	bool:true	
+QuarryMissions#title	Quarry	title:1	
+QuarryMissions#section	Splits in this section	choice:selection:none,all,selection,alldone	None unticks every split below, All ticks them all. All done splits once, when everything below is done. Ticking or unticking splits below updates this.
+Quarry 1	Quarry 1	bool:false	
+Quarry 2	Quarry 2	bool:false	
+Quarry 3	Quarry 3	bool:false	
+Quarry 4	Quarry 4	bool:false	
+Quarry 5	Quarry 5	bool:true	
+Quarry 6	Quarry 6	bool:false	
+Quarry 7	Quarry 7	bool:true	
+Assets#title	Couriers and Valet	title:1	
+Assets#section	Splits in this section	choice:all:none,all,selection,alldone	None unticks every split below, All ticks them all. All done splits once, when everything below is done. Ticking or unticking splits below updates this.
+Los Santos Courier	Los Santos Courier	bool:true	
+Las Venturas Courier	Las Venturas Courier	bool:true	
+San Fierro Courier	San Fierro Courier	bool:true	
+Valet Parking Complete	Valet Parking Complete	bool:true	
+Schools and vehicles#title	Schools and vehicle missions	title:0	
+Schools#title	Schools	title:1	
+Schools#section	Splits in this section	choice:selection:none,all,selection,alldone	None unticks every split below, All ticks them all. All done splits once, when everything below is done. Ticking or unticking splits below updates this.
+Driving School Passed	Driving School Passed	bool:true	
+Boat School Passed	Boat School Passed	bool:true	
+Bike School Passed	Bike School Passed	bool:true	
+Driving School Started	Driving School Started	bool:false	Splits when starting Driving School for the first time
+Vehicle Submissions#title	Vehicle Submissions	title:1	
+Vehicle Submissions#section	Splits in this section	choice:selection:none,all,selection,alldone	None unticks every split below, All ticks them all. All done splits once, when everything below is done. Ticking or unticking splits below updates this.
+Firefighter Complete	Firefighter Complete	bool:true	
+Vigilante Complete	Vigilante Complete	bool:true	
+Taxi Mission Complete	Taxi Mission Complete	bool:true	
+Paramedic Complete	Paramedic Complete	bool:true	
+Pimping Complete	Pimping Complete	bool:true	
+Freight Level 1	Freight Level 1	bool:false	
+Freight Level 2	Freight Level 2	bool:true	
+Races and stadium#title	Races and stadium	title:0	
+Races#title	Races	title:1	
+Races#section	Splits in this section	choice:none:none,all,selection	None unticks every split below, All ticks them all. Ticking or unticking splits below updates this.
+All Races Won	All Races Won	bool:false	
+LS Races#title	Los Santos Races	title:2	
+LS Races#section	Splits in this section	choice:none:none,all,selection,alldone	None unticks every split below, All ticks them all. All done splits once, when everything below is done. Ticking or unticking splits below updates this.
+Little Loop	Little Loop	bool:false	
+Backroad Wanderer	Backroad Wanderer	bool:false	
+City Circuit	City Circuit	bool:false	
+Vinewood (Race)	Vinewood (Race)	bool:false	
+Freeway (Race)	Freeway (Race)	bool:false	
+Into the Country	Into the Country	bool:false	
+SF Races#title	San Fierro Races	title:2	
+SF Races#section	Splits in this section	choice:none:none,all,selection,alldone	None unticks every split below, All ticks them all. All done splits once, when everything below is done. Ticking or unticking splits below updates this.
+Dirtbike Danger	Dirtbike Danger	bool:false	
+Bandito County	Bandito County	bool:false	
+Go-Go Karting	Go-Go Karting	bool:false	
+San Fierro Fastlane	San Fierro Fastlane	bool:false	
+San Fierro Hills	San Fierro Hills	bool:false	
+Country Endurance	Country Endurance	bool:false	
+LV Races#title	Las Venturas Races	title:2	
+LV Races#section	Splits in this section	choice:none:none,all,selection,alldone	None unticks every split below, All ticks them all. All done splits once, when everything below is done. Ticking or unticking splits below updates this.
+SF to LV	SF to LV	bool:false	
+Dam Rider	Dam Rider	bool:false	
+Desert Tricks	Desert Tricks	bool:false	
+LV Ringroad	LV Ringroad	bool:false	
+Air Races#title	Air Races	title:2	
+Air Races#section	Splits in this section	choice:none:none,all,selection,alldone	None unticks every split below, All ticks them all. All done splits once, when everything below is done. Ticking or unticking splits below updates this.
+World War Ace	World War Ace	bool:false	
+Barnstorming	Barnstorming	bool:false	
+Military Service	Military Service	bool:false	
+Chopper Checkpoint	Chopper Checkpoint	bool:false	
+Whirly Bird Waypoint	Whirly Bird Waypoint	bool:false	
+Heli Hell	Heli Hell	bool:false	
+Stadium Events#title	Stadium Events	title:1	
+Stadium Events#section	Splits in this section	choice:all:none,all,selection,alldone	None unticks every split below, All ticks them all. All done splits once, when everything below is done. Ticking or unticking splits below updates this.
+8-Track	8-Track	bool:true	
+Dirt Track	Dirt Track	bool:true	
+Kickstart	Kickstart	bool:true	
+Bloodring	Bloodring	bool:true	
+Challenges and gyms#title	Challenges and gyms	title:0	
+Challenges#title	Challenges	title:1	
+Challenges#section	Splits in this section	choice:all:none,all,selection,alldone	None unticks every split below, All ticks them all. All done splits once, when everything below is done. Ticking or unticking splits below updates this.
+Chiliad Challenge #1	Chiliad Challenge #1	bool:true	
+Chiliad Challenge #2	Chiliad Challenge #2	bool:true	
+Chiliad Challenge #3	Chiliad Challenge #3	bool:true	
+NRG-500 Stunt Challenge	NRG-500 Stunt Challenge	bool:true	
+BMX Stunt Challenge	BMX Stunt Challenge	bool:true	
+Shooting Range Complete	Shooting Range Complete	bool:true	
+Gym Moves#title	Gym Moves	title:1	
+Gym Moves#section	Splits in this section	choice:all:none,all,selection,alldone	None unticks every split below, All ticks them all. All done splits once, when everything below is done. Ticking or unticking splits below updates this.
+Los Santos Gym Moves	Los Santos Gym Moves	bool:true	
+San Fierro Gym Moves	San Fierro Gym Moves	bool:true	
+Las Venturas Gym Moves	Las Venturas Gym Moves	bool:true	
+Import/Export#title	Import/Export	title:0	
+Export Lists#title	Export Lists	title:1	
+Export Lists#section	Splits in this section	choice:selection:none,all,selection	None unticks every split below, All ticks them all. Ticking or unticking splits below updates this.
+Export List 1#title	Import/Export List 1	title:2	
+Export List 1#section	Splits in this section	choice:all:none,all,selection,alldone	None unticks every split below, All ticks them all. All done splits once, when everything below is done. Ticking or unticking splits below updates this.
+Export Buffalo	Buffalo	bool:true	
+Export Sentinel	Sentinel	bool:true	
+Export Infernus	Infernus	bool:true	
+Export Camper	Camper	bool:true	
+Export Admiral	Admiral	bool:true	
+Export Patriot	Patriot	bool:true	
+Export Sanchez	Sanchez	bool:true	
+Export Stretch	Stretch	bool:true	
+Export Feltzer	Feltzer	bool:true	
+Export Remington	Remington	bool:true	
+Export List 2#title	Import/Export List 2	title:2	
+Export List 2#section	Splits in this section	choice:alldone:none,all,selection,alldone	None unticks every split below, All ticks them all. All done splits once, when everything below is done. Ticking or unticking splits below updates this.
+Export Cheetah	Cheetah	bool:false	
+Export Rancher	Rancher	bool:false	
+Export Stallion	Stallion	bool:false	
+Export Tanker	Tanker	bool:false	
+Export Comet	Comet	bool:false	
+Export Slamvan	Slamvan	bool:false	
+Export Blista Compact	Blista Compact	bool:false	
+Export Stafford	Stafford	bool:false	
+Export Sabre	Sabre	bool:false	
+Export FCR-900	FCR-900	bool:false	
+Export List 3#title	Import/Export List 3	title:2	
+Export List 3#section	Splits in this section	choice:alldone:none,all,selection,alldone	None unticks every split below, All ticks them all. All done splits once, when everything below is done. Ticking or unticking splits below updates this.
+Export Banshee	Banshee	bool:false	
+Export Super GT	Super GT	bool:false	
+Export Journey	Journey	bool:false	
+Export Huntley	Huntley	bool:false	
+Export BF Injection	BF Injection	bool:false	
+Export Blade	Blade	bool:false	
+Export Freeway	Freeway	bool:false	
+Export Mesa	Mesa	bool:false	
+Export ZR-350	ZR-350	bool:false	
+Export Euros	Euros	bool:false	
+Property purchases#title	Properties	title:0	
+Properties#title	Properties	title:1	
+Properties#section	Splits in this section	choice:selection:none,all,selection,alldone	None unticks every split below, All ticks them all. All done splits once, when everything below is done. Ticking or unticking splits below updates this.
+Properties Businesses#title	Businesses	title:2	
+Zero (RC Shop Bought)	Zero (RC Shop Bought)	bool:true	
+Wang Cars (Showroom Bought)	Wang Cars (Showroom Bought)	bool:true	
+Verdant Meadows (Safehouse)	Verdant Meadows (Safehouse)	bool:true	
+Properties Los Santos safehouses#title	Los Santos safehouses	title:2	
+Santa Maria Beach (Safehouse)	Santa Maria Beach (Safehouse)	bool:true	
+Mulholland (Safehouse)	Mulholland (Safehouse)	bool:true	
+Verona Beach (Safehouse)	Verona Beach (Safehouse)	bool:true	
+Willowfield (Safehouse)	Willowfield (Safehouse)	bool:true	
+Jefferson (Safehouse)	Jefferson (Safehouse)	bool:true	
+Verdant Bluffs (Safehouse)	Verdant Bluffs (Safehouse)	bool:true	
+Properties San Fierro safehouses#title	San Fierro safehouses	title:2	
+Calton Heights (Safehouse)	Calton Heights (Safehouse)	bool:true	
+Paradiso (Safehouse)	Paradiso (Safehouse)	bool:true	
+Hashbury (Safehouse)	Hashbury (Safehouse)	bool:true	
+Chinatown (Safehouse)	Chinatown (Safehouse)	bool:true	
+Doherty (Safehouse)	Doherty (Safehouse)	bool:true	
+Properties Las Venturas safehouses#title	Las Venturas safehouses	title:2	
+Rockshore West (Safehouse)	Rockshore West (Safehouse)	bool:true	
+Prickle Pine (Safehouse)	Prickle Pine (Safehouse)	bool:true	
+Whitewood Estate (Safehouse)	Whitewood Estate (Safehouse)	bool:true	
+Redsands West (Safehouse)	Redsands West (Safehouse)	bool:true	
+Creek (Safehouse)	Creek (Safehouse)	bool:true	
+Properties Countryside safehouses#title	Countryside safehouses	title:2	
+Palomino Creek (Safehouse)	Palomino Creek (Safehouse)	bool:true	
+Blueberry (Safehouse)	Blueberry (Safehouse)	bool:true	
+Dillimore (Safehouse)	Dillimore (Safehouse)	bool:true	
+Angel Pine (Safehouse)	Angel Pine (Safehouse)	bool:true	
+Whetstone (Safehouse)	Whetstone (Safehouse)	bool:true	
+Properties Desert safehouses#title	Desert safehouses	title:2	
+Fort Carson (Safehouse)	Fort Carson (Safehouse)	bool:true	
+El Quebrados (Safehouse)	El Quebrados (Safehouse)	bool:true	
+Tierra Robada (Safehouse)	Tierra Robada (Safehouse)	bool:true	
+Properties Hotel suites#title	Hotel suites	title:2	
+Pirates In Men's Pants (Hotel Suite)	Pirates In Men's Pants (Hotel Suite)	bool:true	
+The Camel's Toe (Hotel Suite)	The Camel's Toe (Hotel Suite)	bool:true	
+Queens (Hotel Suite)	Queens (Hotel Suite)	bool:false	
+Old Venturas Strip (Hotel Suite)	Old Venturas Strip (Hotel Suite)	bool:true	
+The Clown's Pocket (Hotel Suite)	The Clown's Pocket (Hotel Suite)	bool:true	
+Collectibles#title	Collectibles	title:0	
+Photos#splits	Photos	choice:each:off,each,all,both	
+Tags#splits	Tags	choice:each:off,each,all,both	
+Oysters#splits	Oysters	choice:each:off,each,all,both	
+Horseshoes#splits	Horseshoes	choice:each:off,each,all,both	
+Stunts (Completed)#splits	Stunts (Completed)	choice:off:off,each,all,both	
+Other#title	Other	title:0	
+Plane Flight	Plane Flight	bool:false	Splits when entering the ticket machine marker for the first time
