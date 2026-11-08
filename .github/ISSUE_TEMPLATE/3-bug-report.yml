@@ -17,6 +17,7 @@ body:
         - gta-sa (Grand Theft Auto: San Andreas, original PC release)
         - gta-sa-de (Grand Theft Auto San Andreas – The Definitive Edition)
         - gta-sa-de-layout (Grand Theft Auto San Andreas – The Definitive Edition, main.scm layout variant)
+        - gta-iii-de (Grand Theft Auto III – The Definitive Edition)
     validations:
       required: true
   - type: input
