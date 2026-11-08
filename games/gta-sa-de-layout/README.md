@@ -82,7 +82,8 @@ same. What changes:
 - Log lines are prefixed `[GTASA:DE Layout Autosplitter]`.
 
 Driving School is the one index where this and `gta-sa-de` disagree.
-`gta-sa-de` reads `$86`, which is index 87 under this layout. This one keeps
+`gta-sa-de` reads `$86`, which is index 87 under this layout because
+`gta-sa-de`'s base is 4 bytes late. This one keeps
 the ASL's 8832, which on 1.0.113.21181 reads a slot nobody has tested. If
 Driving School doesn't split here, suspect that index before the layout.
 
@@ -96,12 +97,16 @@ Load each `.wasm` in turn on 1.0.113.21181 and check the log. Expected here:
 ```
 
 The base is `0x51BEAE0` whether it was scanned or came from the fallback. If
-the scan finds nothing, `Script base fallback: 0x51BEAE0` is logged (the scan
-is then not the source of the base), and `Tags fallback: 0x572B41C` if the tags
-scan fails. Then compare mission splits, Kickstart, Driving School, Shooting
+the scan finds nothing, `Script base fallback: 0x51BEAE0` is logged, and `Tags fallback: 0x572B41C` if
+the tags scan fails. Then compare mission splits, Kickstart, Driving School, Shooting
 Range, Quarry 7 and the end of any%. Quarry 7 (and Quarry "All done") and the
 end of any% are expected to work here and not in `gta-sa-de` on
-1.0.113.21181, because its base is 4 bytes later than this one's.
+1.0.113.21181. `gta-sa-de` misses Quarry 7 because it waits for the Quarry
+counter to reach 7, which never shows (it goes back to 0 in the same frame).
+It misses the end of any% because its base is 4 bytes late and `$9436` isn't
+one of its shifted globals, so it reads slot 9437 instead of 9443. Thread-start
+splits (including `finalec`) can't be compared on 1.0.113.21181, since the
+thread signature doesn't match that version.
 
 ## Differences from the ASL
 
