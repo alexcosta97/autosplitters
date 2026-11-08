@@ -166,12 +166,12 @@ impl Addresses {
         show("Play Time Address", play_time);
         show("Tags Address", tags);
 
+        if script_candidates.is_empty() {
+            return None;
+        }
+
         Some(Self {
-            script_candidates: if script_candidates.is_empty() {
-                return None;
-            } else {
-                script_candidates
-            },
+            script_candidates,
             start: start?,
             start_offset: start_offset? as u64,
             loading: loading?,
@@ -275,6 +275,12 @@ impl Memory {
             }
             return;
         };
+        // Only use the script once its globals were read, otherwise the next
+        // good read would look like every flag going from 0 to its value.
+        if process.read_into_slice(base + script_base, &mut self.globals).is_err() {
+            return;
+        }
+        self.globals_old.copy_from_slice(&self.globals);
         debug(&format!("Script base: 0x{script_base:X}"));
         let (layout, exact) = main_scm::layout_for(size);
         if exact {
@@ -286,9 +292,6 @@ impl Memory {
             ));
         }
         self.script = Some((script_base, layout));
-        if process.read_into_slice(base + script_base, &mut self.globals).is_ok() {
-            self.globals_old.copy_from_slice(&self.globals);
-        }
     }
 
     /// A global by index, read through the layout. Zero before `main.scm`.
