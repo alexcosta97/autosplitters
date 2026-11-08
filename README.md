@@ -13,6 +13,7 @@ auto splitting runtime component, and in
 |---|---|---|
 | Grand Theft Auto: San Andreas (original PC release) | [`games/gta-sa`](games/gta-sa) | `gta-sa.wasm` from the latest `gta-sa-v*` [release](https://github.com/alexcosta97/autosplitters/releases) |
 | Grand Theft Auto: San Andreas – The Definitive Edition | [`games/gta-sa-de`](games/gta-sa-de) | `gta-sa-de.wasm` from the latest `gta-sa-de-v*` [release](https://github.com/alexcosta97/autosplitters/releases) |
+| Grand Theft Auto: San Andreas – The Definitive Edition (main.scm layout variant, for testing) | [`games/gta-sa-de-layout`](games/gta-sa-de-layout) | `gta-sa-de-layout.wasm` from the latest `gta-sa-de-layout-v*` [release](https://github.com/alexcosta97/autosplitters/releases) |
 | Grand Theft Auto III – The Definitive Edition | [`games/gta-iii-de`](games/gta-iii-de) | `gta-iii-de.wasm` from the latest `gta-iii-de-v*` [release](https://github.com/alexcosta97/autosplitters/releases) |
 
 Each game's README explains how to use it and credits the people whose work it
