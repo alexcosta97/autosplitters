@@ -16,6 +16,7 @@ body:
       options:
         - gta-sa (Grand Theft Auto: San Andreas, original PC release)
         - gta-sa-de (Grand Theft Auto San Andreas – The Definitive Edition)
+        - gta-iii-de (Grand Theft Auto III – The Definitive Edition)
     validations:
       required: true
   - type: input

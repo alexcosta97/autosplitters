@@ -1,0 +1,216 @@
+General#title	General	title:0	
+start	Start timer on New Game	bool:true	
+reset	Reset timer on New Game	bool:true	
+missions_end#title	Missions (end)	title:0	
+Luigi Goterelli (end)#title	Luigi Goterelli	title:1	
+Luigi Goterelli (end)#section	Splits in this section	choice:all:none,all,selection,alldone	None unticks every split below, All ticks them all. All done splits once, when everything below is done. Ticking or unticking splits below updates this.
+Give Me Liberty & Luigi's Girls (end)	Give Me Liberty & Luigi's Girls	bool:true	
+Don't Spank Ma Bitch Up (end)	Don't Spank Ma Bitch Up	bool:true	
+Drive Misty For Me (end)	Drive Misty For Me	bool:true	
+Pump-Action Pimp (end)	Pump-Action Pimp	bool:true	
+The Fuzz Ball (end)	The Fuzz Ball	bool:true	
+Joey Leone (end)#title	Joey Leone	title:1	
+Joey Leone (end)#section	Splits in this section	choice:all:none,all,selection,alldone	None unticks every split below, All ticks them all. All done splits once, when everything below is done. Ticking or unticking splits below updates this.
+Mike Lips Last Lunch (end)	Mike Lips Last Lunch	bool:true	
+Farewell 'Chunky' Lee Chong (end)	Farewell 'Chunky' Lee Chong	bool:true	
+Van Heist (end)	Van Heist	bool:true	
+Cipriani's Chauffeur (end)	Cipriani's Chauffeur	bool:true	
+Dead Skunk in The Trunk (end)	Dead Skunk in The Trunk	bool:true	
+The Getaway (end)	The Getaway	bool:true	
+Marty Chonks (end)#title	Marty Chonks	title:1	
+Marty Chonks (end)#section	Splits in this section	choice:all:none,all,selection,alldone	None unticks every split below, All ticks them all. All done splits once, when everything below is done. Ticking or unticking splits below updates this.
+The Crook (end)	The Crook	bool:true	
+The Thieves (end)	The Thieves	bool:true	
+The Wife (end)	The Wife	bool:true	
+Her Lover (end)	Her Lover	bool:true	
+Toni Cipriani (end)#title	Toni Cipriani	title:1	
+Toni Cipriani (end)#section	Splits in this section	choice:all:none,all,selection,alldone	None unticks every split below, All ticks them all. All done splits once, when everything below is done. Ticking or unticking splits below updates this.
+Taking Out The Laundry (end)	Taking Out The Laundry	bool:true	
+The Pick-up (end)	The Pick-up	bool:true	
+Salvatore's Called A Meeting (end)	Salvatore's Called A Meeting	bool:true	
+Triads and Tribulations (end)	Triads and Tribulations	bool:true	
+Blow Fish (end)	Blow Fish	bool:true	
+Salvatore Leone (end)#title	Salvatore Leone	title:1	
+Salvatore Leone (end)#section	Splits in this section	choice:all:none,all,selection,alldone	None unticks every split below, All ticks them all. All done splits once, when everything below is done. Ticking or unticking splits below updates this.
+Chaperone (end)	Chaperone	bool:true	
+Cutting The Grass (end)	Cutting The Grass	bool:true	
+Bomb Da Base: Act I (end)	Bomb Da Base: Act I	bool:true	
+Bomb Da Base: Act II (end)	Bomb Da Base: Act II	bool:true	
+Last Requests (end)	Last Requests	bool:true	
+El Burro (end)#title	El Burro	title:1	
+El Burro (end)#section	Splits in this section	choice:all:none,all,selection,alldone	None unticks every split below, All ticks them all. All done splits once, when everything below is done. Ticking or unticking splits below updates this.
+Turismo (end)	Turismo	bool:true	
+I Scream, You Scream (end)	I Scream, You Scream	bool:true	
+Trial By Fire (end)	Trial By Fire	bool:true	
+Big 'n' Veiny (end)	Big 'n' Veiny	bool:true	
+Asuka Kasen (end)#title	Asuka Kasen	title:1	
+Asuka Kasen (end)#section	Splits in this section	choice:all:none,all,selection,alldone	None unticks every split below, All ticks them all. All done splits once, when everything below is done. Ticking or unticking splits below updates this.
+Sayonara Salvatore (end)	Sayonara Salvatore	bool:true	
+Under Surveillance (end)	Under Surveillance	bool:true	
+Paparazzi Purge (end)	Paparazzi Purge	bool:true	
+Payday for Ray (end)	Payday for Ray	bool:true	
+Two-Faced Tanner (end)	Two-Faced Tanner	bool:true	
+Bait (end)	Bait	bool:true	
+Espresso-2-Go! (end)	Espresso-2-Go!	bool:true	
+S.A.M (end)	S.A.M	bool:true	
+Kenji Kasen (end)#title	Kenji Kasen	title:1	
+Kenji Kasen (end)#section	Splits in this section	choice:all:none,all,selection,alldone	None unticks every split below, All ticks them all. All done splits once, when everything below is done. Ticking or unticking splits below updates this.
+Kanbu Bust-out (end)	Kanbu Bust-out	bool:true	
+Grand Theft Auto (end)	Grand Theft Auto	bool:true	
+Deal Steal (end)	Deal Steal	bool:true	
+Shima (end)	Shima	bool:true	
+Smack Down (end)	Smack Down	bool:true	
+Ray Machowski (end)#title	Ray Machowski	title:1	
+Ray Machowski (end)#section	Splits in this section	choice:all:none,all,selection,alldone	None unticks every split below, All ticks them all. All done splits once, when everything below is done. Ticking or unticking splits below updates this.
+Silence the Sneak (end)	Silence the Sneak	bool:true	
+Arms Shortage (end)	Arms Shortage	bool:true	
+Evidence Dash (end)	Evidence Dash	bool:true	
+Gone Fishing (end)	Gone Fishing	bool:true	
+Plaster Blaster (end)	Plaster Blaster	bool:true	
+Marked Man (end)	Marked Man	bool:true	
+Donald Love (end)#title	Donald Love	title:1	
+Donald Love (end)#section	Splits in this section	choice:all:none,all,selection,alldone	None unticks every split below, All ticks them all. All done splits once, when everything below is done. Ticking or unticking splits below updates this.
+Liberator (end)	Liberator	bool:true	
+Waka-Gashira Wipeout! (end)	Waka-Gashira Wipeout!	bool:true	
+A Drop in the Ocean (end)	A Drop in the Ocean	bool:true	
+Grand Theft Aero (end)	Grand Theft Aero	bool:true	
+Escort Service (end)	Escort Service	bool:true	
+Decoy (end)	Decoy	bool:true	
+Love's Disappearance (end)	Love's Disappearance	bool:true	
+King Courtney (end)#title	King Courtney	title:1	
+King Courtney (end)#section	Splits in this section	choice:all:none,all,selection,alldone	None unticks every split below, All ticks them all. All done splits once, when everything below is done. Ticking or unticking splits below updates this.
+Bling-Bling Scramble (end)	Bling-Bling Scramble	bool:true	
+Uzi Rider (end)	Uzi Rider	bool:true	
+Gangcar Round-up (end)	Gangcar Round-up	bool:true	
+Kingdom Come (end)	Kingdom Come	bool:true	
+Catalina (end)#title	Catalina	title:1	
+Catalina (end)#section	Splits in this section	choice:all:none,all,selection,alldone	None unticks every split below, All ticks them all. All done splits once, when everything below is done. Ticking or unticking splits below updates this.
+The Exchange (end)	The Exchange	bool:true	
+D-Ice (end)#title	D-Ice	title:1	
+D-Ice (end)#section	Splits in this section	choice:all:none,all,selection,alldone	None unticks every split below, All ticks them all. All done splits once, when everything below is done. Ticking or unticking splits below updates this.
+Uzi Money (end)	Uzi Money	bool:true	
+Toyminator (end)	Toyminator	bool:true	
+Rigged to Blow (end)	Rigged to Blow	bool:true	
+Bullion Run (end)	Bullion Run	bool:true	
+Rumble (end)	Rumble	bool:true	
+Off-Road Challenges (end)#title	Off-Road Challenges	title:1	
+Off-Road Challenges (end)#section	Splits in this section	choice:all:none,all,selection,alldone	None unticks every split below, All ticks them all. All done splits once, when everything below is done. Ticking or unticking splits below updates this.
+Patriot Playground (end)	Patriot Playground	bool:true	
+Multistorey Mayhem (end)	Multistorey Mayhem	bool:true	
+A Ride in the Park (end)	A Ride in the Park	bool:true	
+Gripped! (end)	Gripped!	bool:true	
+RC Toyz Missions (end)#title	RC Toyz Missions	title:1	
+RC Toyz Missions (end)#section	Splits in this section	choice:all:none,all,selection,alldone	None unticks every split below, All ticks them all. All done splits once, when everything below is done. Ticking or unticking splits below updates this.
+Diablo Destruction (end)	Diablo Destruction	bool:true	
+Mafia Massacre (end)	Mafia Massacre	bool:true	
+Rumpo Rampage (end)	Rumpo Rampage	bool:true	
+Casino Calamity (end)	Casino Calamity	bool:true	
+missions_start#title	Missions (start)	title:0	
+Luigi Goterelli (start)#title	Luigi Goterelli	title:1	
+Luigi Goterelli (start)#section	Splits in this section	choice:none:none,all,selection	None unticks every split below, All ticks them all. Ticking or unticking splits below updates this.
+Don't Spank Ma Bitch Up (start)	Don't Spank Ma Bitch Up	bool:false	
+Drive Misty For Me (start)	Drive Misty For Me	bool:false	
+Pump-Action Pimp (start)	Pump-Action Pimp	bool:false	
+The Fuzz Ball (start)	The Fuzz Ball	bool:false	
+Joey Leone (start)#title	Joey Leone	title:1	
+Joey Leone (start)#section	Splits in this section	choice:none:none,all,selection	None unticks every split below, All ticks them all. Ticking or unticking splits below updates this.
+Mike Lips Last Lunch (start)	Mike Lips Last Lunch	bool:false	
+Farewell 'Chunky' Lee Chong (start)	Farewell 'Chunky' Lee Chong	bool:false	
+Van Heist (start)	Van Heist	bool:false	
+Cipriani's Chauffeur (start)	Cipriani's Chauffeur	bool:false	
+Dead Skunk in The Trunk (start)	Dead Skunk in The Trunk	bool:false	
+The Getaway (start)	The Getaway	bool:false	
+Marty Chonks (start)#title	Marty Chonks	title:1	
+Marty Chonks (start)#section	Splits in this section	choice:none:none,all,selection	None unticks every split below, All ticks them all. Ticking or unticking splits below updates this.
+The Crook (start)	The Crook	bool:false	
+The Thieves (start)	The Thieves	bool:false	
+The Wife (start)	The Wife	bool:false	
+Her Lover (start)	Her Lover	bool:false	
+Toni Cipriani (start)#title	Toni Cipriani	title:1	
+Toni Cipriani (start)#section	Splits in this section	choice:none:none,all,selection	None unticks every split below, All ticks them all. Ticking or unticking splits below updates this.
+Taking Out The Laundry (start)	Taking Out The Laundry	bool:false	
+The Pick-up (start)	The Pick-up	bool:false	
+Salvatore's Called A Meeting (start)	Salvatore's Called A Meeting	bool:false	
+Triads and Tribulations (start)	Triads and Tribulations	bool:false	
+Blow Fish (start)	Blow Fish	bool:false	
+Salvatore Leone (start)#title	Salvatore Leone	title:1	
+Salvatore Leone (start)#section	Splits in this section	choice:none:none,all,selection	None unticks every split below, All ticks them all. Ticking or unticking splits below updates this.
+Chaperone (start)	Chaperone	bool:false	
+Cutting The Grass (start)	Cutting The Grass	bool:false	
+Bomb Da Base: Act I (start)	Bomb Da Base: Act I	bool:false	
+Bomb Da Base: Act II (start)	Bomb Da Base: Act II	bool:false	
+Last Requests (start)	Last Requests	bool:false	
+El Burro (start)#title	El Burro	title:1	
+El Burro (start)#section	Splits in this section	choice:none:none,all,selection	None unticks every split below, All ticks them all. Ticking or unticking splits below updates this.
+Turismo (start)	Turismo	bool:false	
+I Scream, You Scream (start)	I Scream, You Scream	bool:false	
+Trial By Fire (start)	Trial By Fire	bool:false	
+Big 'n' Veiny (start)	Big 'n' Veiny	bool:false	
+Asuka Kasen (start)#title	Asuka Kasen	title:1	
+Asuka Kasen (start)#section	Splits in this section	choice:none:none,all,selection	None unticks every split below, All ticks them all. Ticking or unticking splits below updates this.
+Sayonara Salvatore (start)	Sayonara Salvatore	bool:false	
+Under Surveillance (start)	Under Surveillance	bool:false	
+Paparazzi Purge (start)	Paparazzi Purge	bool:false	
+Payday for Ray (start)	Payday for Ray	bool:false	
+Two-Faced Tanner (start)	Two-Faced Tanner	bool:false	
+Bait (start)	Bait	bool:false	
+Espresso-2-Go! (start)	Espresso-2-Go!	bool:false	
+S.A.M (start)	S.A.M	bool:false	
+Kenji Kasen (start)#title	Kenji Kasen	title:1	
+Kenji Kasen (start)#section	Splits in this section	choice:none:none,all,selection	None unticks every split below, All ticks them all. Ticking or unticking splits below updates this.
+Kanbu Bust-out (start)	Kanbu Bust-out	bool:false	
+Grand Theft Auto (start)	Grand Theft Auto	bool:false	
+Deal Steal (start)	Deal Steal	bool:false	
+Shima (start)	Shima	bool:false	
+Smack Down (start)	Smack Down	bool:false	
+Ray Machowski (start)#title	Ray Machowski	title:1	
+Ray Machowski (start)#section	Splits in this section	choice:none:none,all,selection	None unticks every split below, All ticks them all. Ticking or unticking splits below updates this.
+Silence the Sneak (start)	Silence the Sneak	bool:false	
+Arms Shortage (start)	Arms Shortage	bool:false	
+Evidence Dash (start)	Evidence Dash	bool:false	
+Gone Fishing (start)	Gone Fishing	bool:false	
+Plaster Blaster (start)	Plaster Blaster	bool:false	
+Marked Man (start)	Marked Man	bool:false	
+Donald Love (start)#title	Donald Love	title:1	
+Donald Love (start)#section	Splits in this section	choice:none:none,all,selection	None unticks every split below, All ticks them all. Ticking or unticking splits below updates this.
+Liberator (start)	Liberator	bool:false	
+Waka-Gashira Wipeout! (start)	Waka-Gashira Wipeout!	bool:false	
+A Drop in the Ocean (start)	A Drop in the Ocean	bool:false	
+Grand Theft Aero (start)	Grand Theft Aero	bool:false	
+Escort Service (start)	Escort Service	bool:false	
+Decoy (start)	Decoy	bool:false	
+Love's Disappearance (start)	Love's Disappearance	bool:false	
+King Courtney (start)#title	King Courtney	title:1	
+King Courtney (start)#section	Splits in this section	choice:none:none,all,selection	None unticks every split below, All ticks them all. Ticking or unticking splits below updates this.
+Bling-Bling Scramble (start)	Bling-Bling Scramble	bool:false	
+Uzi Rider (start)	Uzi Rider	bool:false	
+Gangcar Round-up (start)	Gangcar Round-up	bool:false	
+Kingdom Come (start)	Kingdom Come	bool:false	
+Catalina (start)#title	Catalina	title:1	
+Catalina (start)#section	Splits in this section	choice:none:none,all,selection	None unticks every split below, All ticks them all. Ticking or unticking splits below updates this.
+The Exchange (start)	The Exchange	bool:false	
+D-Ice (start)#title	D-Ice	title:1	
+D-Ice (start)#section	Splits in this section	choice:none:none,all,selection	None unticks every split below, All ticks them all. Ticking or unticking splits below updates this.
+Uzi Money (start)	Uzi Money	bool:false	
+Toyminator (start)	Toyminator	bool:false	
+Rigged to Blow (start)	Rigged to Blow	bool:false	
+Bullion Run (start)	Bullion Run	bool:false	
+Rumble (start)	Rumble	bool:false	
+Off-Road Challenges (start)#title	Off-Road Challenges	title:1	
+Off-Road Challenges (start)#section	Splits in this section	choice:none:none,all,selection	None unticks every split below, All ticks them all. Ticking or unticking splits below updates this.
+Patriot Playground (start)	Patriot Playground	bool:false	
+Multistorey Mayhem (start)	Multistorey Mayhem	bool:false	
+A Ride in the Park (start)	A Ride in the Park	bool:false	
+Gripped! (start)	Gripped!	bool:false	
+RC Toyz Missions (start)#title	RC Toyz Missions	title:1	
+RC Toyz Missions (start)#section	Splits in this section	choice:none:none,all,selection	None unticks every split below, All ticks them all. Ticking or unticking splits below updates this.
+Diablo Destruction (start)	Diablo Destruction	bool:false	
+Mafia Massacre (start)	Mafia Massacre	bool:false	
+Rumpo Rampage (start)	Rumpo Rampage	bool:false	
+Casino Calamity (start)	Casino Calamity	bool:false	
+collectibles#title	Collectibles	title:0	
+Hidden Packages#splits	Hidden Packages	choice:off:off,each,all,both	
+Unique Stunt Jumps#splits	Unique Stunt Jumps	choice:off:off,each,all,both	
+Rampages#splits	Rampages	choice:off:off,each,all,both	
+Other#title	Other	title:0	
+any_end	Any% Final Split	bool:true	Splits once you lose control on "The Exchange".
