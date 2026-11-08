@@ -99,12 +99,13 @@ pub fn all_done_key(giver: &str) -> String {
 pub fn check(toggles: &impl Toggles, attempt: &mut Attempt, inputs: &Inputs) -> Option<Split> {
     // Missions passed
     for (giver, missions) in MISSIONS {
+        let key = all_done_key(giver);
+        if !toggles.get(&key) {
+            continue;
+        }
         let passed = missions.iter().map(|(index, _)| inputs.pair(*index, Shift::Mission).pair());
-        if completion::just_completed(passed) {
-            let key = all_done_key(giver);
-            if toggles.get(&key) && attempt.first_time(&key) {
-                return Some(Split::AllDone(key));
-            }
+        if completion::just_completed(passed) && attempt.first_time(&key) {
+            return Some(Split::AllDone(key));
         }
     }
     for (_, missions) in MISSIONS {
@@ -449,6 +450,8 @@ mod tests {
 
     #[test]
     fn all_done_comes_before_the_mission_split() {
+        // The real tree can't have both settings on (All done unticks the
+        // missions); this only checks the order.
         // The Exchange is the only mission of Catalina.
         let on = On::new(&["Catalina (end)#allDone", "The Exchange (end)"]);
         let mut a = Attempt::new();
