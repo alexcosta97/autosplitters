@@ -8,17 +8,9 @@ pub const TRUCKING: u32 = 9581;
 /// `g_nQuarryMissionsPassed` on the versions the ASL's indexes are for.
 pub const QUARRY: u32 = 9593;
 
-/// Freight level flags, see `MISSIONS2`.
-const FREIGHT_1: u32 = 9670;
-const FREIGHT_2: u32 = 9669;
-
-/// Globals that sit `Addresses::globals_shift` (6) slots later on
-/// 1.0.113.21181 than the ASL's indexes, which are for other versions. The ASL
-/// only did this for Trucking; the gyms were found by watching $9582 change
-/// when learning the San Fierro gym moves on 1.0.113.21181. Quarry and
-/// Freight are declared after the gyms and Trucking in the leaked DE script
-/// source, so they move with them.
-pub static VERSION_SHIFTED: &[u32] = &[9575, 9576, 9580, TRUCKING, QUARRY, FREIGHT_1, FREIGHT_2];
+/// The Quarry complete flag, set together with the counter's reset (see
+/// `MISSIONS2`).
+pub const QUARRY_DONE: u32 = 2902;
 
 /// Global variable index and the associated values and missions.
 #[rustfmt::skip]
@@ -88,7 +80,9 @@ pub static MISSIONS: &[(u32, &[(i32, &str)])] = &[
     ]),
     (QUARRY, &[ // g_nQuarryMissionsPassed
         (1, "Quarry 1"), (2, "Quarry 2"), (3, "Quarry 3"), (4, "Quarry 4"),
-        (5, "Quarry 5"), (6, "Quarry 6"), (7, "Quarry 7"),
+        (5, "Quarry 5"), (6, "Quarry 6"),
+        // Quarry 7 is in MISSIONS2, this counter goes back to 0 in the same
+        // frame it reaches 7, so the 7 can't be seen
     ]),
 ];
 
@@ -97,9 +91,9 @@ pub static MISSIONS: &[(u32, &[(i32, &str)])] = &[
 pub static MISSIONS2: &[(&str, &[(u32, &str)])] = &[
     // Flight School not here because it is a Story Mission
     ("Schools", &[
-        // driving_test_passed, set to 1 when Driving School is passed. The
-        // ASL used 8832, which never changes when it is.
-        (86, "Driving School Passed"),   // $MISSION_BACK_TO_SCHOOL_PASSED
+        // gta-sa-de reads 86 here (87 under this layout). 8832 is untested on
+        // 1.0.113.21181.
+        (8832, "Driving School Passed"), // $MISSION_BACK_TO_SCHOOL_PASSED
         (3390, "Boat School Passed"),    // $MISSION_BOAT_SCHOOL_PASSED
         (3622, "Bike School Passed"),    // $MISSION_DRIVING_SCHOOL_PASSED (actually Bike School)
     ]),
@@ -143,8 +137,8 @@ pub static MISSIONS2: &[(&str, &[(u32, &str)])] = &[
         (763, "Blueberry (Safehouse)"),
     ]),
     ("Freight", &[
-        (FREIGHT_1, "Freight Level 1"), // $8240
-        (FREIGHT_2, "Freight Level 2"), // $8239 (goes to 2 at the end of the level)
+        (9670, "Freight Level 1"), // $8240
+        (9669, "Freight Level 2"), // $8239 (goes to 2 at the end of the level)
     ]),
     ("Gym Moves", &[
         (9575, "Los Santos Gym Moves"),    // $8153
@@ -154,10 +148,12 @@ pub static MISSIONS2: &[(&str, &[(u32, &str)])] = &[
     ("Challenges", &[
         (4214, "NRG-500 Stunt Challenge"), // $4214
         (4213, "BMX Stunt Challenge"),     // $4213
-        // player_has_fast_reload: set to 1 the first time the final
-        // (assault rifle) round is passed. The ASL used 6690, which is
-        // car_gen_hover[5] in DE and gets a car generator handle on New Game.
-        (6694, "Shooting Range Complete"), // $5272
+        (6690, "Shooting Range Complete"), // $5272
+    ]),
+    // Not added as a settings group (the setting is added with the other
+    // Quarry missions)
+    ("Quarry", &[
+        (QUARRY_DONE, "Quarry 7"), // Quarry complete flag, set together with the counter reset
     ]),
     ("Assets", &[
         (3413, "Los Santos Courier"),    // $MISSION_COURIER_LS_PASSED ($1992)
@@ -206,9 +202,7 @@ pub static MISSIONS2: &[(&str, &[(u32, &str)])] = &[
     ("Stadium Events", &[
         (3746, "8-Track"),   // 25
         (3747, "Dirt Track"), // 26
-        // flag_kickstart_passed_1stime. The ASL used 91, which is
-        // f1_the90_best_score, set by a test halfway through Driving School.
-        (90, "Kickstart"),   // $MISSION_KICKSTART_PASSED ($90)
+        (91, "Kickstart"),   // $MISSION_KICKSTART_PASSED ($90)
         (3362, "Bloodring"), // $MISSION_BLOODRING_PASSED ($1941)
     ]),
 ];
@@ -227,6 +221,10 @@ pub static COLLECTIBLES: [u32; 5] = [
 /// Split when a certain thread was started, usually when a mission was started.
 #[rustfmt::skip]
 pub static START_MISSIONS: &[(&str, &str)] = &[
+    // Normally split by Part 2 being passed (which is right before this
+    // starts), this is for when the chase is started in some other way, where
+    // the mission counter doesn't change
+    ("finalec", "End of the Line Part 2"),
     ("steal", "Wang Cars (Showroom Bought)"),
     ("planes", "Plane Flight"),
     ("psch", "Verdant Meadows (Safehouse)"),
@@ -247,4 +245,33 @@ pub const MAX_GLOBAL: u32 = 9670;
 
 pub fn missions2(group: &str) -> &'static [(u32, &'static str)] {
     MISSIONS2.iter().find(|(g, _)| *g == group).map_or(&[], |(_, m)| m)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn quarry_7_is_a_flag() {
+        let (_, quarry) = MISSIONS.iter().find(|(i, _)| *i == QUARRY).unwrap();
+        assert!(quarry.iter().all(|(v, _)| *v <= 6));
+        assert_eq!(missions2("Quarry"), [(2902, "Quarry 7")]);
+    }
+
+    #[test]
+    fn asl_indexes() {
+        let find = |name| {
+            MISSIONS2.iter().flat_map(|(_, m)| m.iter()).find(|(_, n)| *n == name).unwrap().0
+        };
+        assert_eq!(find("Kickstart"), 91);
+        assert_eq!(find("Shooting Range Complete"), 6690);
+        assert_eq!(find("Driving School Passed"), 8832);
+        assert_eq!(find("Freight Level 1"), 9670);
+        assert_eq!(find("Freight Level 2"), 9669);
+    }
+
+    #[test]
+    fn finalec_splits_part_2() {
+        assert!(START_MISSIONS.contains(&("finalec", "End of the Line Part 2")));
+    }
 }

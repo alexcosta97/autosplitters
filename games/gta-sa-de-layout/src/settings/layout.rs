@@ -121,7 +121,10 @@ pub fn build() -> Tree {
     b.section_all_done("ZeroMissions", "Zero", 1, |b| add_missions(b, 544));
     b.section_all_done("Wang CarsMissions", "Wang Cars", 1, |b| add_missions(b, 546));
     b.section_all_done("TruckingMissions", "Trucking", 1, |b| add_missions(b, TRUCKING));
-    b.section_all_done("QuarryMissions", "Quarry", 1, |b| add_missions(b, QUARRY));
+    b.section_all_done("QuarryMissions", "Quarry", 1, |b| {
+        add_missions(b, QUARRY);
+        add_missions2(b, "Quarry", true);
+    });
     b.section_all_done("Assets", "Couriers and Valet", 1, |b| add_missions2(b, "Assets", true));
 
     b.heading("Schools and vehicles", "Schools and vehicle missions", 0);

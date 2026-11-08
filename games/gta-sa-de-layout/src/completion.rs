@@ -36,6 +36,9 @@ pub enum Count {
     /// The `data::MISSIONS` counter of a mission strand, up to its last
     /// mission.
     Strand(u32),
+    /// A strand's counter, whose last mission is in the `data::MISSIONS2`
+    /// group as a flag.
+    StrandFlag { strand: u32, group: &'static str },
     /// The `data::MISSIONS2` challenges, and the Chiliad Challenge being done
     /// (`CHILIAD_DONE`, set once all three races were won).
     Challenges,
@@ -56,7 +59,7 @@ pub static SECTIONS: &[(&str, Count)] = &[
     ("ZeroMissions", Count::Strand(544)),
     ("Wang CarsMissions", Count::Strand(546)),
     ("TruckingMissions", Count::Strand(TRUCKING)),
-    ("QuarryMissions", Count::Strand(QUARRY)),
+    ("QuarryMissions", Count::StrandFlag { strand: QUARRY, group: "Quarry" }),
     ("Assets", Count::Groups(&["Assets"])),
     ("Schools", Count::Groups(&["Schools"])),
     ("Vehicle Submissions", Count::Groups(&["Vehicle Submissions", "Freight"])),
@@ -87,6 +90,9 @@ impl Count {
                 let last = strand(*index).iter().map(|(v, _)| *v).max().unwrap();
                 Vec::from([(*index, Rule::AtLeast(last))])
             }
+            Count::StrandFlag { group, .. } => {
+                data::missions2(group).iter().map(|(index, _)| (*index, Rule::Set)).collect()
+            }
             Count::Challenges => data::missions2("Challenges")
                 .iter()
                 .map(|(index, _)| (*index, Rule::Set))
@@ -103,6 +109,11 @@ impl Count {
                 groups.iter().flat_map(|g| data::missions2(g)).map(|(_, name)| *name).collect()
             }
             Count::Strand(index) => strand(*index).iter().map(|(_, name)| *name).collect(),
+            Count::StrandFlag { strand: index, group } => strand(*index)
+                .iter()
+                .map(|(_, name)| *name)
+                .chain(data::missions2(group).iter().map(|(_, name)| *name))
+                .collect(),
             Count::Challenges => {
                 data::missions2("Challenges").iter().map(|(_, name)| *name).collect()
             }
@@ -175,11 +186,29 @@ mod tests {
     }
 
     #[test]
+    fn quarry_all_done_on_the_flag() {
+        let rules: Vec<Rule> = SECTIONS
+            .iter()
+            .find(|(k, _)| *k == "QuarryMissions")
+            .unwrap()
+            .1
+            .items()
+            .into_iter()
+            .map(|(_, rule)| rule)
+            .collect();
+        let done = |v: (i32, i32)| just_completed(rules.iter().map(|r| (*r, v)));
+        assert!(done((0, 1)));
+        // A loaded save with Quarry already done.
+        assert!(!done((1, 1)));
+        assert!(!done((0, 0)));
+    }
+
+    #[test]
     fn strands_count_up_to_their_last_mission() {
         let items = |key| SECTIONS.iter().find(|(k, _)| *k == key).unwrap().1.items();
         assert!(matches!(items("HeistMissions")[..], [(602, Rule::AtLeast(6))]));
         assert!(matches!(items("TruckingMissions")[..], [(TRUCKING, Rule::AtLeast(8))]));
-        assert!(matches!(items("QuarryMissions")[..], [(QUARRY, Rule::AtLeast(7))]));
+        assert!(matches!(items("QuarryMissions")[..], [(data::QUARRY_DONE, Rule::Set)]));
         assert_eq!(items("Vehicle Submissions").len(), 7);
         assert_eq!(items("Properties").len(), 30);
         assert_eq!(items("Challenges").len(), 4);

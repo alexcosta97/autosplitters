@@ -175,8 +175,7 @@ impl Addresses {
     }
 
     fn global_index(&self, index: u32) -> usize {
-        let shifted = data::VERSION_SHIFTED.contains(&index);
-        (if shifted { index + self.globals_shift } else { index }) as usize
+        index as usize
     }
 }
 
