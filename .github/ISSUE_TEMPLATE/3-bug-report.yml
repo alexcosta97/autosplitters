@@ -14,6 +14,7 @@ body:
     attributes:
       label: Auto splitter
       options:
+        - gta-sa (Grand Theft Auto: San Andreas, original PC release)
         - gta-sa-de (Grand Theft Auto San Andreas – The Definitive Edition)
     validations:
       required: true
@@ -21,7 +22,7 @@ body:
     id: version
     attributes:
       label: Auto splitter version
-      description: The release you downloaded, e.g. gta-sa-de-v0.2.0, or the commit you built.
+      description: The release you downloaded, e.g. gta-sa-v0.1.0 or gta-sa-de-v0.2.0, or the commit you built.
     validations:
       required: true
   - type: textarea

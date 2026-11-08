@@ -213,24 +213,15 @@ pub static MISSIONS2: &[(&str, &[(u32, &str)])] = &[
     ]),
 ];
 
-/// Collectible type (acts as setting ID) and integer stat ID.
+/// Integer stat IDs of the collectibles in `names::COLLECTIBLE_KINDS`, in the
+/// same order.
 #[rustfmt::skip]
-pub static COLLECTIBLES: &[(&str, u32)] = &[
-    ("Photos", 231),
-    ("Tags", 322), // read from a separate address, the stat ID isn't used
-    ("Oysters", 243),
-    ("Horseshoes", 241),
-    ("Stunts (Completed)", 145),
-];
-
-#[rustfmt::skip]
-pub static EXPORT_LISTS: [[&str; 10]; 3] = [
-    ["Buffalo", "Sentinel", "Infernus", "Camper", "Admiral",
-     "Patriot", "Sanchez", "Stretch", "Feltzer", "Remington"],
-    ["Cheetah", "Rancher", "Stallion", "Tanker", "Comet",
-     "Slamvan", "Blista Compact", "Stafford", "Sabre", "FCR-900"],
-    ["Banshee", "Super GT", "Journey", "Huntley", "BF Injection",
-     "Blade", "Freeway", "Mesa", "ZR-350", "Euros"],
+pub static COLLECTIBLES: [u32; 5] = [
+    231,
+    322, // Tags: read from a separate address, the stat ID isn't used
+    243,
+    241,
+    145,
 ];
 
 /// Split when a certain thread was started, usually when a mission was started.
