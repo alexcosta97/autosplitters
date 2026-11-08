@@ -7,7 +7,7 @@
 
 use crate::data::{COLLECTIBLES, MISSIONS};
 use crate::splits::{end_key, start_key};
-use gta_sa_common::settings::tree::{Builder, Tree};
+use autosplitter_utils::settings::tree::{Builder, Tree};
 
 /// The mission whose start isn't a setting, "don't need this" in the ASL.
 const NO_START: &str = "Give Me Liberty & Luigi's Girls";
@@ -60,7 +60,7 @@ mod tests {
     use super::*;
     use crate::data::SCRIPTS;
     use crate::splits::all_done_key;
-    use gta_sa_common::settings::tree::Kind;
+    use autosplitter_utils::settings::tree::Kind;
 
     #[test]
     fn widget_keys_are_unique() {

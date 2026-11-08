@@ -1,5 +1,4 @@
-//! Settings shared by the GTA San Andreas auto splitters, ported from the
-//! `startup` blocks of both games' ASLs (`GTASA.asl` and `GTA_SA.asl`).
+//! Settings for the auto splitters, modelled on the `startup` block of an ASL.
 //!
 //! ASL settings are nested: a setting only counts as enabled if all of its
 //! parents are enabled too. The auto splitting runtime only has a flat list of

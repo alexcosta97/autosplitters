@@ -9,6 +9,7 @@ asr = { git = "https://github.com/LiveSplit/asr", features = [
     "signature", # Scanning signatures.
 ] }
 
+autosplitter-utils = { path = "../../crates/autosplitter-utils" }
 gta-sa-common = { path = "../../crates/gta-sa-common" }
 
 # Heap allocator

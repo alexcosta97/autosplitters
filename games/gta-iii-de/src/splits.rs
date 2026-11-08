@@ -10,9 +10,9 @@ use core::fmt;
 use crate::completion;
 use crate::data::{self, COLLECTIBLES, EXCHANGE_THREAD, MISSIONS, TE_HELIPAD, TE_TIMER};
 use crate::version::{Layout, Shift};
-use gta_sa_common::attempt::Attempt;
-use gta_sa_common::pair::Pair;
-use gta_sa_common::settings::Toggles;
+use autosplitter_utils::attempt::Attempt;
+use autosplitter_utils::pair::Pair;
+use autosplitter_utils::settings::Toggles;
 
 /// What the rules look at on a tick.
 pub struct Inputs<'a> {

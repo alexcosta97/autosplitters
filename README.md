@@ -26,6 +26,11 @@ games/<game>/          one crate per game, named <game>-autosplitter
   Cargo.toml           the game's dependencies (releases set the version)
   README.md            usage, differences from any original, credits
   src/
+crates/autosplitter-utils/  code shared by every game: the settings tree,
+                       split-once tracking, old/current pairs, signature
+                       scan helpers
+crates/gta-sa-common/  the San Andreas names and split rules, shared by the
+                       San Andreas games
 docs/                  notes that aren't about one game
 scripts/release/       works out each game's next version and release notes
 Cargo.toml             the workspace, and the release profile for every game

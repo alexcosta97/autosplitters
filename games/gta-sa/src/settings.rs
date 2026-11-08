@@ -10,14 +10,14 @@
 use alloc::format;
 
 use crate::data;
-use gta_sa_common::names::{
-    self, BL_MISSIONS, DESERT_MISSIONS, LS_MISSIONS, LV_MISSIONS, PROPERTIES, RTLS_MISSIONS,
-    SF_MISSIONS,
-};
-use gta_sa_common::settings::{
+use autosplitter_utils::settings::{
     self,
     tree::{Builder, Tree},
     Settings,
+};
+use gta_sa_common::names::{
+    self, BL_MISSIONS, DESERT_MISSIONS, LS_MISSIONS, LV_MISSIONS, PROPERTIES, RTLS_MISSIONS,
+    SF_MISSIONS,
 };
 
 // Mission givers of the big sections: heading and the address in
@@ -237,7 +237,7 @@ mod tests {
     use alloc::{collections::BTreeMap, format, vec::Vec};
 
     use super::*;
-    use gta_sa_common::settings::tree::Kind;
+    use autosplitter_utils::settings::tree::Kind;
 
     fn checkboxes(tree: &Tree) -> Vec<&str> {
         tree.widgets
