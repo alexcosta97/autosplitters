@@ -1,12 +1,18 @@
-# GTA San Andreas DE auto splitter (WebAssembly)
+# GTA San Andreas DE auto splitter, main.scm layout variant (WebAssembly)
 
 Port of the GTA San Andreas Definitive Edition ASL auto splitter to the
 LiveSplit auto splitting runtime, so it works in LiveSplit One and with games
 running under Proton. See [Credits](#credits) for where it comes from.
 
+This is a copy of [`gta-sa-de`](../gta-sa-de) that finds the script's globals
+the way the updated DE ASL does, so the two approaches can be tested side by
+side on the same game (issue #19). After testing, one approach is kept and
+the other goes. Settings, setting keys and defaults are the same as in
+`gta-sa-de`, so one splits file works with both.
+
 ## Download
 
-Get `gta-sa-de.wasm` from the latest `gta-sa-de-v*`
+Get `gta-sa-de-layout.wasm` from the latest `gta-sa-de-layout-v*`
 [release](https://github.com/alexcosta97/autosplitters/releases).
 
 ## Build
@@ -14,15 +20,15 @@ Get `gta-sa-de.wasm` from the latest `gta-sa-de-v*`
 From the repository root:
 
 ```sh
-cargo build --release -p gta-sa-de-autosplitter
+cargo build --release -p gta-sa-de-layout-autosplitter
 ```
 
-Output: `target/wasm32-unknown-unknown/release/gta_sa_de_autosplitter.wasm`
+Output: `target/wasm32-unknown-unknown/release/gta_sa_de_layout_autosplitter.wasm`
 
 The settings logic has tests that run on the host:
 
 ```sh
-cargo test-host -p gta-sa-de-autosplitter
+cargo test-host -p gta-sa-de-layout-autosplitter
 ```
 
 ## Use on Linux with Proton
@@ -39,7 +45,63 @@ cargo test-host -p gta-sa-de-autosplitter
 3. Load the `.wasm` file as the auto splitter, then launch the game through
    Steam as usual. The runtime looks for the `SanAndreas.exe` process.
 
-Log messages are prefixed with `[GTASA:DE Autosplitter]`.
+Log messages are prefixed with `[GTASA:DE Layout Autosplitter]`.
+
+## Differences from gta-sa-de
+
+`gta-sa-de` reads the script's globals from a hardcoded base, `0x51BEAE4`,
+and shifts some of them by +6 on 1.0.113.21181. This one finds the base and
+the shift from `main.scm`, as the updated DE ASL does. Everything else is the
+same. What changes:
+
+- The script base comes from the signature scan on every version. On
+  1.0.113.21181, `0x51BEAE0` is also tried if the scan finds nothing. Each
+  candidate must start with main.scm's header (`02 00 01`, then the size in
+  bytes of the header and globals). Until one does, "Waiting for main.scm" is
+  logged once, script globals aren't read and nothing splits. Start and reset
+  don't depend on it. Once found, the base is kept while the process runs.
+- The header size picks the layout, which shifts the global indexes: 49492
+  has no shift, and 49536 (1.0.113.21181) shifts by +1 from index 450, +5 from
+  4825, +6 from 8729 and +7 from 9180. An unknown size uses the closest known
+  layout and logs `Unknown main.scm layout: <size> (using <key>, some splits
+  may not work)`.
+- `gta-sa-de`'s +6 shift for some globals is gone. The globals use the ASL's
+  indexes instead, which the layout shifts: Kickstart 91, Shooting Range
+  Complete 6690, Driving School Passed 8832, Trucking 9581, the gym moves
+  9575, 9576 and 9580, Quarry 9593 and Freight 9669 and 9670.
+- Quarry 7 splits on the flag `$2902` going from 0 to above 0, because the
+  Quarry counter goes back to 0 in the same frame it reaches 7. Quarry "All
+  done" is done when that flag is set. The setting stays where it was, last in
+  the Quarry section.
+- Starting the `finalec` thread splits "End of the Line Part 2", for when the
+  chase starts without the counter changing.
+- The end of any% splits when `eotl` (9436) goes from 2 to 3, without checking
+  that End of the Line Part 2 was passed.
+- The tags pattern is the updated ASL's (`89 ??` where `gta-sa-de` has
+  `89 2d`). On 1.0.113.21181, `0x572B41C` is used if the scan fails.
+- Log lines are prefixed `[GTASA:DE Layout Autosplitter]`.
+
+Driving School is the one index where this and `gta-sa-de` disagree.
+`gta-sa-de` reads `$86`, which is index 87 under this layout. This one keeps
+the ASL's 8832, which on 1.0.113.21181 reads a slot nobody has tested. If
+Driving School doesn't split here, suspect that index before the layout.
+
+### Comparing the two in game
+
+Load each `.wasm` in turn on 1.0.113.21181 and check the log. Expected here:
+
+```
+[GTASA:DE Layout Autosplitter] Script base: 0x51BEAE0
+[GTASA:DE Layout Autosplitter] main.scm layout: 49536
+```
+
+The base is `0x51BEAE0` whether it was scanned or came from the fallback. If
+the scan finds nothing, `Script base fallback: 0x51BEAE0` is logged (the scan
+is then not the source of the base), and `Tags fallback: 0x572B41C` if the tags
+scan fails. Then compare mission splits, Kickstart, Driving School, Shooting
+Range, Quarry 7 and the end of any%. Quarry 7 (and Quarry "All done") and the
+end of any% are expected to work here and not in `gta-sa-de` on
+1.0.113.21181, because its base is 4 bytes later than this one's.
 
 ## Differences from the ASL
 
@@ -96,16 +158,6 @@ Log messages are prefixed with `[GTASA:DE Autosplitter]`.
   Settings saved in a splits file still take precedence.
 - The 500 ms load guard and 2.5 s double-split guard are counted in ticks
   (20 per second), because there's no clock without WASI.
-- The trucking global variable index uses the version-specific value from
-  `init` (9587 on 1.0.113.21181, 9581 otherwise). The ASL always read 9581,
-  because the missions dictionary was built before `init` changed the offset.
-- The gym moves globals get the same +6 shift on 1.0.113.21181 (LS 9581,
-  SF 9582, LV 9586 instead of 9575, 9576, 9580). SF was confirmed by watching
-  $9582 change when learning the San Fierro gym moves; LS and LV follow the
-  same spacing (`data::VERSION_SHIFTED`).
-- Quarry (`$9593`) and the Freight levels (`$9669`, `$9670`) get the same +6
-  shift on 1.0.113.21181. They're declared after the gym and Trucking globals
-  in the leaked DE script source, so they move with them.
 - The ASL's unused `startOnSaveLoad` setting now does something: "Start timer
   on loading a save" starts the timer once a save has finished loading, and
   "Reset timer on loading a save" (`resetOnSaveLoad`, new) resets it, starting
@@ -132,11 +184,13 @@ Log messages are prefixed with `[GTASA:DE Autosplitter]`.
     read 33 or 34). That is what Sweet's phone call needs to unlock "End of the
     Line": the script only makes it once more than 34% are owned.
 - If the executable version can't be read, pattern scanning is still attempted
-  instead of disabling the auto splitter.
+  instead of disabling the auto splitter. Only the fallback addresses need the
+  version.
 
 ## Fixes over the ASL
 
-Found while testing on 1.0.113.21181 under Proton 11:
+Found while testing `gta-sa-de` on 1.0.113.21181 under Proton 11, and kept
+here:
 
 - The thread signature doesn't match this version. Only the start/reset and
   mission-counter addresses are required now; thread, stats and tags are
@@ -147,28 +201,11 @@ Found while testing on 1.0.113.21181 under Proton 11:
   published its settings.
 - Loads are tracked on every tick, not only while the timer runs. Previously
   the New Game load ended before the timer started, so the 500 ms guard didn't
-  apply and `$6690` ("Shooting Range Complete"), which the game initialises to
-  a non-zero value, split immediately.
+  apply and "Shooting Range Complete", which the game initialises to a
+  non-zero value, split immediately.
 - A New Game starts/resets the timer only once until play time goes backwards
   again. The start flag flips 1 -> 0 a second time during the intro, still
   under the 5 s play time limit, which reset and restarted the timer.
-- "Shooting Range Complete" reads `$6694` instead of `$6690`. In DE, `$6690`
-  is `car_gen_hover[5]`, a car generator handle set on New Game, so it could
-  never work as a completion flag. `$6694` is `player_has_fast_reload`, which
-  the Ammu-Nation challenge sets to 1 the first time its final round is
-  passed. Found by lining up the leaked DE script source's declarations with
-  the live globals (source slot + 37 in this area).
-- "Kickstart" reads `$90` instead of `$91`, and "Driving School Passed" reads
-  `$86` instead of `$8832`. In the leaked DE script source these are
-  `flag_kickstart_passed_1stime` and `driving_test_passed`, which Driving
-  School sets to 1 when it's passed. `$91` is `f1_the90_best_score`, the
-  score of the seventh driving test, so Kickstart split halfway through
-  Driving School, and `$8832` didn't change when the school was passed.
-- Races from Dirtbike Danger on read `$3721` + their race index, like the Los
-  Santos races. The ASL skipped the indexes of Badlands A and B (7 and 8), so
-  it read every San Fierro, Las Venturas, air and stadium race two indexes
-  early: winning Dirtbike Danger split "Go-Go Karting", and the first two San
-  Fierro races read the Badlands races.
 
 ## Credits
 
@@ -181,9 +218,11 @@ auto splitter. Thanks to everyone who worked on it:
 - **Parik**: the patterns for signature scanning and the global variable
   indexes.
 
+The main.scm layout detection (header size, shifts by index range, the Quarry
+7 flag, `finalec` and the any% condition) comes from the updated DE ASL.
+
 The global variable indexes were checked against the leaked DE main script
-([JuniorDjjr's gist](https://gist.github.com/JuniorDjjr/2129e1e7640f7969acdfb1c56c263155)),
-which the "leaked DE script source" mentioned above refers to.
+([JuniorDjjr's gist](https://gist.github.com/JuniorDjjr/2129e1e7640f7969acdfb1c56c263155)).
 
 The notes in the source that name ASL variables (`$SWEET_TOTAL_PASSED_MISSIONS`
 and so on) come from their work.
