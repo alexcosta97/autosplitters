@@ -38,7 +38,12 @@ pub enum Count {
     Strand(u32),
     /// A strand's counter, whose last mission is in the `data::MISSIONS2`
     /// group as a flag.
-    StrandFlag { strand: u32, group: &'static str },
+    StrandFlag {
+        /// Only read by the tests (`names`), the flag is what splits.
+        #[cfg_attr(not(test), allow(dead_code))]
+        strand: u32,
+        group: &'static str,
+    },
     /// The `data::MISSIONS2` challenges, and the Chiliad Challenge being done
     /// (`CHILIAD_DONE`, set once all three races were won).
     Challenges,

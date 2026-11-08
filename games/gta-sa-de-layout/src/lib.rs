@@ -34,6 +34,7 @@ use gta_sa_common::attempt::{Attempt, Outcome};
 use gta_sa_common::names;
 use gta_sa_common::pair::Pair;
 use gta_sa_common::rules;
+use main_scm::{Layout, MAX_SHIFT};
 use settings::Settings;
 use triggers::{Events, Triggers};
 
@@ -74,7 +75,7 @@ static LOADING_SIG: Signature<30> = Signature::new(
 static PLAY_TIME_SIG: Signature<22> =
     Signature::new("8b 15 ?? ?? ?? ?? ?? 85 c9 74 ?? 8b 05 ?? ?? ?? ?? 05 20 bf 02 00");
 static TAGS_SIG: Signature<28> = Signature::new(
-    "8b 3d ?? ?? ?? ?? ?? 8d 15 ?? ?? ?? ?? 8b 1d ?? ?? ?? ?? 66 ?? 89 2d ?? ?? ?? ?? e8",
+    "8b 3d ?? ?? ?? ?? ?? 8d 15 ?? ?? ?? ?? 8b 1d ?? ?? ?? ?? 66 ?? 89 ?? ?? ?? ?? ?? e8",
 );
 
 /// `getAddressFromPattern`: resolves a RIP-relative operand to an offset from
@@ -105,15 +106,18 @@ fn value_from_pattern<const N: usize>(
 // Version Detection
 //=============================================================================
 
+/// The tags address on `main_scm::FALLBACK_VERSION`, used when the scan fails.
+const FALLBACK_TAGS: u64 = 0x572B41C;
+
 /// Offsets from the module base, like the `int` addresses in the ASL.
 struct Addresses {
-    script_base: u64,
+    /// Script base offsets to try, in order. The first with a `main.scm`
+    /// header is used.
+    script_candidates: Vec<u64>,
     start: u64,
     start_offset: u64,
     loading: u64,
     play_time: u64,
-    /// Added to the indexes in `data::VERSION_SHIFTED`.
-    globals_shift: u32,
     // Optional: the ASL kept going when these scans failed, only the splits
     // relying on them stopped working. The thread pattern doesn't match on
     // 1.0.113.21181, for example.
@@ -126,18 +130,18 @@ impl Addresses {
     /// Returns `None` if one of the addresses needed for starting the timer
     /// and splitting on missions wasn't found yet.
     fn resolve(process: &Process, module: (Address, u64), version: &str) -> Option<Self> {
-        let hardcoded = version == "1.0.113.21181";
-        let (script_base, tags, globals_shift) = if hardcoded {
-            debug("Using hardcoded addresses for version 1.0.113.21181");
-            (Some(0x51BEAE4), Some(0x572B41C), 6)
-        } else {
-            debug(&format!("Using pattern scanning for version {version}"));
-            (
-                address_from_pattern(process, module, 5, &SCRIPT_BASE_SIG),
-                address_from_pattern(process, module, 2, &TAGS_SIG),
-                0,
-            )
-        };
+        let scanned_script = address_from_pattern(process, module, 5, &SCRIPT_BASE_SIG);
+        let script_candidates = main_scm::script_candidates(scanned_script, version);
+        if scanned_script.is_none() && !script_candidates.is_empty() {
+            debug(&format!("Script base fallback: 0x{:X}", script_candidates[0]));
+        }
+        let scanned_tags = address_from_pattern(process, module, 2, &TAGS_SIG);
+        let tags = scanned_tags.or_else(|| {
+            (version == main_scm::FALLBACK_VERSION).then(|| {
+                debug(&format!("Tags fallback: 0x{FALLBACK_TAGS:X}"));
+                FALLBACK_TAGS
+            })
+        });
         let start = address_from_pattern(process, module, 9, &START_SIG);
         let start_offset = value_from_pattern(process, module, 21, &START_SIG);
         let loading = address_from_pattern(process, module, 3, &LOADING_SIG);
@@ -152,30 +156,30 @@ impl Addresses {
             }
         }
         show("Stat Base Address", stat_base);
-        show("Script Base Address", script_base);
+        for candidate in &script_candidates {
+            debug(&format!("Script Base Candidate: 0x{candidate:X}"));
+        }
         show("Start Address", start);
         show("Start Offset", start_offset.map(|o| o as u64));
         show("Thread Address", thread);
         show("Loading Address", loading);
         show("Play Time Address", play_time);
         show("Tags Address", tags);
-        debug(&format!("Globals Shift: {globals_shift}"));
 
         Some(Self {
-            script_base: script_base?,
+            script_candidates: if script_candidates.is_empty() {
+                return None;
+            } else {
+                script_candidates
+            },
             start: start?,
             start_offset: start_offset? as u64,
             loading: loading?,
             play_time: play_time?,
-            globals_shift,
             stat_base,
             thread,
             tags,
         })
-    }
-
-    fn global_index(&self, index: u32) -> usize {
-        index as usize
     }
 }
 
@@ -186,6 +190,12 @@ impl Addresses {
 struct Memory {
     base: Address,
     addrs: Addresses,
+    /// The script base offset and the layout of `main.scm`, once found. The
+    /// game builds `main.scm` after the module is mapped, so until then no
+    /// global can be read and nothing splits.
+    script: Option<(u64, &'static Layout)>,
+    /// Whether "Waiting for main.scm" was logged already.
+    logged_waiting: bool,
     /// Script global variables are one contiguous array of 4 byte values, so
     /// read all of them at once instead of one watcher per variable.
     globals_old: Vec<i32>,
@@ -200,10 +210,12 @@ struct Memory {
 
 impl Memory {
     fn new(base: Address, addrs: Addresses) -> Self {
-        let len = (data::MAX_GLOBAL + addrs.globals_shift) as usize + 1;
+        let len = (data::MAX_GLOBAL + MAX_SHIFT) as usize + 1;
         Self {
             base,
             addrs,
+            script: None,
+            logged_waiting: false,
             globals_old: vec![0; len],
             globals: vec![0; len],
             loading: Pair::default(),
@@ -216,12 +228,17 @@ impl Memory {
 
     fn update(&mut self, process: &Process) {
         let base = self.base;
-        let a = &self.addrs;
 
-        core::mem::swap(&mut self.globals_old, &mut self.globals);
-        if process.read_into_slice(base + a.script_base, &mut self.globals).is_err() {
-            self.globals.copy_from_slice(&self.globals_old);
+        if self.script.is_none() {
+            self.find_script(process);
         }
+        if let Some((script_base, _)) = self.script {
+            core::mem::swap(&mut self.globals_old, &mut self.globals);
+            if process.read_into_slice(base + script_base, &mut self.globals).is_err() {
+                self.globals.copy_from_slice(&self.globals_old);
+            }
+        }
+        let a = &self.addrs;
 
         self.loading.update(process.read(base + a.loading).ok());
         self.start_flag.update(
@@ -243,8 +260,43 @@ impl Memory {
         }
     }
 
+    /// Looks for a script base with a `main.scm` header, and picks the layout
+    /// for its size. Reads the globals once, so old equals current (the ASL's
+    /// `UpdateAll` after adding the watchers).
+    fn find_script(&mut self, process: &Process) {
+        let base = self.base;
+        let found = main_scm::first_with_header(&self.addrs.script_candidates, |candidate| {
+            process.read::<[u8; main_scm::HEADER_LEN]>(base + candidate).ok()
+        });
+        let Some((script_base, size)) = found else {
+            if !self.logged_waiting {
+                debug("Waiting for main.scm");
+                self.logged_waiting = true;
+            }
+            return;
+        };
+        debug(&format!("Script base: 0x{script_base:X}"));
+        let (layout, exact) = main_scm::layout_for(size);
+        if exact {
+            debug(&format!("main.scm layout: {size}"));
+        } else {
+            debug(&format!(
+                "Unknown main.scm layout: {size} (using {}, some splits may not work)",
+                layout.size
+            ));
+        }
+        self.script = Some((script_base, layout));
+        if process.read_into_slice(base + script_base, &mut self.globals).is_ok() {
+            self.globals_old.copy_from_slice(&self.globals);
+        }
+    }
+
+    /// A global by index, read through the layout. Zero before `main.scm`.
     fn global(&self, index: u32) -> Pair<i32> {
-        let i = self.addrs.global_index(index);
+        let Some((_, layout)) = self.script else {
+            return Pair { old: 0, current: 0 };
+        };
+        let i = layout.slot(index);
         Pair { old: self.globals_old[i], current: self.globals[i] }
     }
 
@@ -308,21 +360,6 @@ impl Splitter {
         }
     }
 
-    /// Check if the given mission (the name has to be exact) has already been
-    /// passed, based on the current memory value.
-    fn passed(&self, mem: &Memory, mission: &str) -> bool {
-        match rules::passed(data::MISSIONS, mission, |index| mem.global(index).current) {
-            Some((value, current)) => {
-                debug(&format!("Check: {mission} {value} >= {current}"));
-                current >= value
-            }
-            None => {
-                debug(&format!("Mission not found: {mission}"));
-                false
-            }
-        }
-    }
-
     fn update(&mut self, mem: &Memory) {
         self.tick += 1;
         self.settings.update();
@@ -375,6 +412,10 @@ impl Splitter {
     }
 
     fn should_split(&mut self, mem: &Memory) -> bool {
+        // Nothing splits until main.scm is found and its layout known.
+        if mem.script.is_none() {
+            return false;
+        }
         //=====================================================================
         // Split prevention
         //=====================================================================
@@ -470,11 +511,10 @@ impl Splitter {
         // End of any%
         let eotl = mem.global(data::EOTL);
         if eotl.current == 3 && eotl.old == 2 {
-            // This check is probably not necessary since the variable $8014
-            // seems to be only used in EotL Part 3, but just to be safe.
-            if self.passed(mem, "End of the Line Part 2") {
-                return self.try_split("any%");
-            }
+            // This variable is only used in EotL Part 3, so there is no need
+            // to check if the missions before it have been passed (which they
+            // haven't if they were skipped).
+            return self.try_split("any%");
         }
 
         // Starting a certain mission

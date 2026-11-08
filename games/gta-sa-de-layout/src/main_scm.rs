@@ -11,6 +11,9 @@ use alloc::vec::Vec;
 /// Bytes read at the script base: the opcode `02 00 01` and the i32 size.
 pub const HEADER_LEN: usize = 7;
 
+/// The game version the fixed script base and tags address are known for.
+pub const FALLBACK_VERSION: &str = "1.0.113.21181";
+
 /// The script base on game version 1.0.113.21181, used when the signature
 /// scan finds nothing.
 const FALLBACK_SCRIPT_BASE: u64 = 0x51BEAE0;
@@ -73,7 +76,7 @@ pub fn layout_for(size: u32) -> (&'static Layout, bool) {
 /// the version it is known for.
 pub fn script_candidates(scanned: Option<u64>, version: &str) -> Vec<u64> {
     let mut candidates: Vec<u64> = scanned.into_iter().collect();
-    if version == "1.0.113.21181" {
+    if version == FALLBACK_VERSION {
         candidates.push(FALLBACK_SCRIPT_BASE);
     }
     candidates
