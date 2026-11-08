@@ -69,18 +69,23 @@ Log messages are prefixed with `[GTAIII:DE Autosplitter]`.
   settings, both on by default.
 - The 500 ms load guard is counted in ticks (20 per second), because there's
   no clock without WASI. Loads are tracked on every tick, not only while the
-  timer runs: the ASL only did it while splitting, so the load at New Game,
-  which ends before the timer starts, didn't start the guard.
+  timer runs, so a load that ends just before the timer starts still starts the
+  guard (as in gta-sa-de). The ASL only did it while splitting.
 - If the executable version can't be read, the auto splitter logs it and uses
   the layout of Group 1 (the standard 1.0 offsets), which is what the ASL ends
   up with. The group in use is logged.
-- The scan range is the size from the PE header, rounded up to whole pages.
+- The scan range is the size from SizeOfImage in the PE header instead of the
+  ASL's `ModuleMemorySize`, because Wine doesn't always report the module size
+  correctly, rounded up to whole pages.
   asr's `Signature::scan_iter` panics when a scan reaches the end of a range
   that ends partway through a page, i.e. whenever a signature isn't found.
 - The ASL's defaults are kept: mission end checkboxes, the Any% final split,
   `start` and `reset` are on; mission start checkboxes and collectibles are
   off. All four signature scans are required, as in the ASL; if one fails, the
-  log says which, and it tries again every second.
+  log says which.
+- If a scan fails, it tries again every second instead of staying off until
+  the game restarts, so attaching before the game has finished starting up
+  still works.
 
 ## Credits
 

@@ -209,6 +209,8 @@ struct Splitter {
     /// Tick when the last load occurred.
     last_load: Option<u64>,
     waiting: bool,
+    /// Whether "Loading" was logged for the load in progress.
+    was_loading: bool,
 }
 
 impl Splitter {
@@ -220,9 +222,9 @@ impl Splitter {
         self.tick += 1;
         self.settings.update();
 
-        // Track loads on every tick, not just while the timer is running. The
-        // ASL only did this in `split`, so the load at New Game (which ends
-        // before the timer starts) didn't trigger the guard.
+        // Track loads on every tick, not only while the timer runs, so a load
+        // that ends just before the timer starts still starts the guard (as in
+        // gta-sa-de). The ASL only did this in `split`.
         if mem.loading.current != 0 {
             self.last_load = Some(self.tick);
         }
@@ -265,9 +267,13 @@ impl Splitter {
         // Split prevention
         //=====================================================================
         if mem.loading.current != 0 {
-            debug("Loading");
+            if !self.was_loading {
+                debug("Loading");
+                self.was_loading = true;
+            }
             return false;
         }
+        self.was_loading = false;
         if self.ticks_since(self.last_load) < LOAD_COOLDOWN_TICKS {
             // Prevent splitting shortly after loading, since this can
             // sometimes occur because memory values change
@@ -365,6 +371,7 @@ async fn main() {
         tick: 0,
         last_load: None,
         waiting: false,
+        was_loading: false,
     };
 
     loop {
