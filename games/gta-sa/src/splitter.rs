@@ -5,8 +5,8 @@
 use alloc::{format, string::String};
 
 use crate::{data, values::Values};
-use gta_sa_common::attempt::{Attempt, Outcome};
-use gta_sa_common::settings::Toggles;
+use autosplitter_utils::attempt::{Attempt, Outcome};
+use autosplitter_utils::settings::Toggles;
 use gta_sa_common::{names, rules};
 
 /// `refreshRate` in the ASL. There's no wall clock without WASI, so the
@@ -152,7 +152,7 @@ impl Splitter {
     /// already been split since the timer started.
     ///
     /// Returns true if the split should occur. See
-    /// `gta_sa_common::attempt::Attempt::try_split`: the split is also added
+    /// `autosplitter_utils::attempt::Attempt::try_split`: the split is also added
     /// to the list of already split splits when the cooldown prevents it.
     fn try_split(&mut self, split_id: &str, s: &impl Toggles) -> bool {
         if !s.get(split_id) {
@@ -345,8 +345,8 @@ mod tests {
 
     use super::*;
     use crate::{data, settings};
-    use gta_sa_common::pair::Pair;
-    use gta_sa_common::settings::tree::{State, Tree, Value};
+    use autosplitter_utils::pair::Pair;
+    use autosplitter_utils::settings::tree::{State, Tree, Value};
 
     /// The settings' defaults, with some overridden.
     struct Test {

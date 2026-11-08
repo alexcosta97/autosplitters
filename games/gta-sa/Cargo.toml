@@ -8,6 +8,7 @@ asr = { git = "https://github.com/LiveSplit/asr", features = [
     "alloc", # Working with allocations.
 ] }
 
+autosplitter-utils = { path = "../../crates/autosplitter-utils" }
 gta-sa-common = { path = "../../crates/gta-sa-common" }
 
 # Heap allocator

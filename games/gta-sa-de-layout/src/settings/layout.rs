@@ -10,11 +10,11 @@
 use alloc::format;
 
 use crate::data::{self, QUARRY, TRUCKING};
+use autosplitter_utils::settings::tree::{Builder, Tree};
 use gta_sa_common::names::{
     self, BL_MISSIONS, DESERT_MISSIONS, LS_MISSIONS, LV_MISSIONS, PROPERTIES, RTLS_MISSIONS,
     SF_MISSIONS,
 };
-use gta_sa_common::settings::tree::{Builder, Tree};
 
 // Mission givers of the big sections: heading and the `data::MISSIONS` global
 // counting their missions. Ordered by the first of their missions in the lists
@@ -289,7 +289,7 @@ mod tests {
 
     use super::*;
     use crate::completion;
-    use gta_sa_common::settings::tree::Kind;
+    use autosplitter_utils::settings::tree::Kind;
 
     /// What every setting of the old tree (with the "Enable splits in this
     /// section" switches) did with no saved settings, `key<TAB>true|false`.

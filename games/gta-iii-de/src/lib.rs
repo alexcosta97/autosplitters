@@ -22,15 +22,15 @@ mod version;
 
 use alloc::{format, vec, vec::Vec};
 use asr::{
-    file_format::pe,
     future::{next_tick, retry},
     signature::Signature,
     timer::{self, TimerState},
     Address, Process,
 };
 
-use gta_sa_common::attempt::Attempt;
-use gta_sa_common::pair::Pair;
+use autosplitter_utils::attempt::Attempt;
+use autosplitter_utils::pair::Pair;
+use autosplitter_utils::scan;
 use settings::Settings;
 use version::{Group, Layout};
 
@@ -65,19 +65,6 @@ static LOADING_SIG: Signature<30> = Signature::new(
     "8b 15 ?? ?? ?? ?? e8 ?? ?? ?? ?? 8b 05 ?? ?? ?? ?? 89 05 ?? ?? ?? ?? c6 05 ?? ?? ?? ?? 01",
 );
 
-/// `getAddressFromPattern`: resolves a RIP-relative operand to an offset from
-/// the module base.
-fn address_from_pattern<const N: usize>(
-    process: &Process,
-    module: (Address, u64),
-    offset: u64,
-    sig: &Signature<N>,
-) -> Option<u64> {
-    let ptr = sig.scan_process_range(process, module)? + offset;
-    let disp: i32 = process.read(ptr).ok()?;
-    Some((ptr.value() - module.0.value()).wrapping_add_signed(disp as i64 + 4))
-}
-
 /// The loading flag, found through the instruction that writes it, which
 /// depends on the build (see `version::loading_disp_offset`).
 fn loading_address(process: &Process, module: (Address, u64)) -> Option<u64> {
@@ -107,11 +94,11 @@ impl Addresses {
     /// Returns `None` if a signature wasn't found, the ASL disables itself
     /// then (`vars.ready`).
     fn resolve(process: &Process, module: (Address, u64)) -> Option<Self> {
-        let script_space = address_from_pattern(process, module, 6, &SCRIPT_SPACE_SIG);
-        let mission_script = address_from_pattern(process, module, 7, &MISSION_SCRIPT_SIG);
+        let script_space = scan::address_from_pattern(process, module, 6, &SCRIPT_SPACE_SIG);
+        let mission_script = scan::address_from_pattern(process, module, 7, &MISSION_SCRIPT_SIG);
         // The flag is the byte after the one the instruction writes.
         let start_flag =
-            address_from_pattern(process, module, 2, &START_FLAG_SIG).map(|rva| rva + 1);
+            scan::address_from_pattern(process, module, 2, &START_FLAG_SIG).map(|rva| rva + 1);
         let loading = loading_address(process, module);
 
         fn show(name: &str, addr: Option<u64>) {
@@ -324,25 +311,12 @@ async fn init(process: &Process, settings: &mut Settings) -> Memory {
 }
 
 fn try_init(process: &Process) -> Option<Memory> {
-    let base = process.get_module_address(PROCESS_NAME).ok()?;
-    // Wine doesn't necessarily report the module size correctly, the PE
-    // header does.
-    let size = pe::read_size_of_image(process, base)
-        .map(u64::from)
-        .or_else(|| process.get_module_size(PROCESS_NAME).ok())?;
-    // Round up to whole pages. asr's `Signature::scan_iter` panics on a range
-    // that ends partway through a page when the scan reaches the end, i.e.
-    // whenever a signature isn't found. The module is mapped in whole pages,
-    // so this is safe.
-    let size = size.next_multiple_of(0x1000);
+    let (base, size) = scan::scan_range(process, PROCESS_NAME)?;
 
-    let group = match pe::FileVersion::read(process, base) {
+    let group = match scan::version(process, base) {
         Some(v) => {
-            debug(&format!(
-                "Detected executable version: {}.{}.{}.{}",
-                v.major_version, v.minor_version, v.build_part, v.private_part
-            ));
-            Group::from_version(v.build_part, v.private_part)
+            debug(&format!("Detected executable version: {v}"));
+            Group::from_version(v.build, v.private)
         }
         None => {
             // The ASL ends up with build and private parts of 0 here.

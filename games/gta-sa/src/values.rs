@@ -4,7 +4,7 @@
 
 use alloc::{collections::BTreeMap, vec::Vec};
 
-use gta_sa_common::pair::Pair;
+use autosplitter_utils::pair::Pair;
 
 /// What one tick read; `None` where a read failed.
 pub struct Reading {

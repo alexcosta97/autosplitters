@@ -19,13 +19,13 @@ mod version;
 
 use alloc::{format, vec::Vec};
 use asr::{
-    file_format::pe,
     future::{next_tick, retry},
     timer::{self, TimerState},
     Address, PointerSize, Process,
 };
 
-use gta_sa_common::settings::Settings;
+use autosplitter_utils::scan;
+use autosplitter_utils::settings::Settings;
 use splitter::{debug, Phase, Splitter, TICK_RATE};
 use values::{Reading, Values};
 use version::{Addresses, Version, VersionValues, VERSION_VALUE_ADDRS};
@@ -92,23 +92,12 @@ impl splitter::Timer for AsrTimer {
     }
 }
 
-/// The module's base address and size, once the module is mapped.
-fn module(process: &Process, name: &str) -> Option<(Address, u64)> {
-    let base = process.get_module_address(name).ok()?;
-    // Wine doesn't necessarily report the module size correctly, the PE
-    // header does.
-    let size = pe::read_size_of_image(process, base)
-        .map(u64::from)
-        .or_else(|| process.get_module_size(name).ok())?;
-    Some((base, size))
-}
-
 /// Equivalent of the ASL `init` block's version detection. `None` if the
 /// version is unknown, which disables the auto splitter.
 async fn init(process: &Process, name: &str, settings: &mut Settings) -> Option<Memory> {
     let (base, size) = retry(|| {
         settings.update();
-        module(process, name)
+        scan::module_range(process, name)
     })
     .await;
     let read = |i: usize| process.read::<i32>(base + VERSION_VALUE_ADDRS[i] as u64).ok();

@@ -20,6 +20,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "autosplitter-utils"
+version = "0.1.0"
+dependencies = [
+ "asr",
+]
+
+[[package]]
 name = "bytemuck"
 version = "1.25.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -67,8 +74,8 @@ name = "gta-iii-de-autosplitter"
 version = "0.1.0"
 dependencies = [
  "asr",
+ "autosplitter-utils",
  "dlmalloc",
- "gta-sa-common",
 ]
 
 [[package]]
@@ -76,6 +83,7 @@ name = "gta-sa-autosplitter"
 version = "0.1.0"
 dependencies = [
  "asr",
+ "autosplitter-utils",
  "dlmalloc",
  "gta-sa-common",
 ]
@@ -83,15 +91,13 @@ dependencies = [
 [[package]]
 name = "gta-sa-common"
 version = "0.1.0"
-dependencies = [
- "asr",
-]
 
 [[package]]
 name = "gta-sa-de-autosplitter"
 version = "0.1.0"
 dependencies = [
  "asr",
+ "autosplitter-utils",
  "dlmalloc",
  "gta-sa-common",
 ]
@@ -101,6 +107,7 @@ name = "gta-sa-de-layout-autosplitter"
 version = "0.1.0"
 dependencies = [
  "asr",
+ "autosplitter-utils",
  "dlmalloc",
  "gta-sa-common",
 ]

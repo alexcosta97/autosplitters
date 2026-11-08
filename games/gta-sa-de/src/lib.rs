@@ -21,16 +21,16 @@ mod triggers;
 
 use alloc::{format, string::String, vec, vec::Vec};
 use asr::{
-    file_format::pe,
     future::{next_tick, retry},
     signature::Signature,
     timer::{self, TimerState},
     Address, PointerSize, Process,
 };
 
-use gta_sa_common::attempt::{Attempt, Outcome};
+use autosplitter_utils::attempt::{Attempt, Outcome};
+use autosplitter_utils::pair::Pair;
+use autosplitter_utils::scan;
 use gta_sa_common::names;
-use gta_sa_common::pair::Pair;
 use gta_sa_common::rules;
 use settings::Settings;
 use triggers::{Events, Triggers};
@@ -75,30 +75,6 @@ static TAGS_SIG: Signature<28> = Signature::new(
     "8b 3d ?? ?? ?? ?? ?? 8d 15 ?? ?? ?? ?? 8b 1d ?? ?? ?? ?? 66 ?? 89 2d ?? ?? ?? ?? e8",
 );
 
-/// `getAddressFromPattern`: resolves a RIP-relative operand to an offset from
-/// the module base.
-fn address_from_pattern<const N: usize>(
-    process: &Process,
-    module: (Address, u64),
-    offset: u64,
-    sig: &Signature<N>,
-) -> Option<u64> {
-    let ptr = sig.scan_process_range(process, module)? + offset;
-    let disp: i32 = process.read(ptr).ok()?;
-    Some((ptr.value() - module.0.value()).wrapping_add_signed(disp as i64 + 4))
-}
-
-/// `getValueFromPattern`: reads an immediate operand.
-fn value_from_pattern<const N: usize>(
-    process: &Process,
-    module: (Address, u64),
-    offset: u64,
-    sig: &Signature<N>,
-) -> Option<i32> {
-    let ptr = sig.scan_process_range(process, module)? + offset;
-    process.read(ptr).ok()
-}
-
 //=============================================================================
 // Version Detection
 //=============================================================================
@@ -131,17 +107,17 @@ impl Addresses {
         } else {
             debug(&format!("Using pattern scanning for version {version}"));
             (
-                address_from_pattern(process, module, 5, &SCRIPT_BASE_SIG),
-                address_from_pattern(process, module, 2, &TAGS_SIG),
+                scan::address_from_pattern(process, module, 5, &SCRIPT_BASE_SIG),
+                scan::address_from_pattern(process, module, 2, &TAGS_SIG),
                 0,
             )
         };
-        let start = address_from_pattern(process, module, 9, &START_SIG);
-        let start_offset = value_from_pattern(process, module, 21, &START_SIG);
-        let loading = address_from_pattern(process, module, 3, &LOADING_SIG);
-        let play_time = address_from_pattern(process, module, 2, &PLAY_TIME_SIG);
-        let stat_base = address_from_pattern(process, module, 16, &STAT_BASE_SIG);
-        let thread = address_from_pattern(process, module, 3, &THREAD_SIG);
+        let start = scan::address_from_pattern(process, module, 9, &START_SIG);
+        let start_offset = scan::value_from_pattern(process, module, 21, &START_SIG);
+        let loading = scan::address_from_pattern(process, module, 3, &LOADING_SIG);
+        let play_time = scan::address_from_pattern(process, module, 2, &PLAY_TIME_SIG);
+        let stat_base = scan::address_from_pattern(process, module, 16, &STAT_BASE_SIG);
+        let thread = scan::address_from_pattern(process, module, 3, &THREAD_SIG);
 
         fn show(name: &str, addr: Option<u64>) {
             match addr {
@@ -283,7 +259,7 @@ impl Splitter {
     /// already been split since the timer started.
     ///
     /// Returns true if the split should occur. See
-    /// `gta_sa_common::attempt::Attempt::try_split`: the split is also added
+    /// `autosplitter_utils::attempt::Attempt::try_split`: the split is also added
     /// to the list of already split splits when the cooldown prevents it.
     fn try_split(&mut self, split_id: &str) -> bool {
         if !self.settings.get(split_id) {
@@ -549,22 +525,11 @@ async fn init(process: &Process, settings: &mut Settings) -> Memory {
 }
 
 fn try_init(process: &Process) -> Option<Memory> {
-    let base = process.get_module_address(PROCESS_NAME).ok()?;
-    // Wine doesn't necessarily report the module size correctly, the PE
-    // header does.
-    let size = pe::read_size_of_image(process, base)
-        .map(u64::from)
-        .or_else(|| process.get_module_size(PROCESS_NAME).ok())?;
-    // Round up to whole pages. asr's `Signature::scan_iter` panics on a range
-    // that ends partway through a page when the scan reaches the end, i.e.
-    // whenever a signature isn't found (SizeOfImage is 0x5CA4400 on
-    // 1.0.113.21181). The module is mapped in whole pages, so this is safe.
-    let size = size.next_multiple_of(0x1000);
+    // SizeOfImage is 0x5CA4400 on 1.0.113.21181.
+    let (base, size) = scan::scan_range(process, PROCESS_NAME)?;
 
-    let version = match pe::FileVersion::read(process, base) {
-        Some(v) => {
-            format!("{}.{}.{}.{}", v.major_version, v.minor_version, v.build_part, v.private_part)
-        }
+    let version = match scan::version(process, base) {
+        Some(v) => format!("{v}"),
         None => {
             debug("Could not read the executable's version, trying pattern scanning");
             String::from("<unknown>")
