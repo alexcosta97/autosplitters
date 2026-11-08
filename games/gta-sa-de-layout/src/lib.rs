@@ -16,6 +16,7 @@ static ALLOC: dlmalloc::GlobalDlmalloc = dlmalloc::GlobalDlmalloc;
 
 mod completion;
 mod data;
+mod main_scm;
 mod settings;
 mod territory;
 mod triggers;
