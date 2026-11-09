@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: jdx/mise-action@v4
+      - uses: jdx/mise-action@v5
       - run: shellcheck -x scripts/release/*.sh
       - run: scripts/release/test.sh
       - run: actionlint
